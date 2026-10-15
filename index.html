@@ -21,10 +21,10 @@
             </div>
         </header>
 
-        <!-- Personalización y Precio del Boleto -->
+        <!-- Personalización y Configuración -->
         <details class="bg-white shadow-sm rounded-xl p-4 mb-6 border border-slate-200 text-sm">
             <summary class="font-semibold text-indigo-600 cursor-pointer select-none flex items-center justify-between">
-                <span>⚙️ Ajustes del Evento y Precio del Boleto</span>
+                <span>⚙️ Ajustes del Evento, Fecha y Precio</span>
                 <span class="text-xs text-slate-400">Haz clic aquí para cambiar</span>
             </summary>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3 border-t border-slate-100">
@@ -34,7 +34,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha del Sorteo</label>
-                    <input type="text" id="inputFecha" value="Próximamente" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="inputFecha" value="Por definir" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Precio por Boleto (S/)</label>
@@ -136,7 +136,7 @@
 
     <script>
         // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+        const URL_API = 'PEGA_AQUÍ_TU_URL_DE_GOOGLE_APPS_SCRIPT';
         
         let registros = [];
 
@@ -153,24 +153,32 @@
         const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
         const formTitulo = document.getElementById('formTitulo');
 
-        // Cargar precio guardado previamente o usar 10 por defecto
-        const precioGuardado = localStorage.getItem('precio_boleto_rifa');
-        if (precioGuardado) {
-            precioInput.value = precioGuardado;
-        } else {
-            precioInput.value = "10";
+        // Cargar datos guardados en el navegador
+        if (localStorage.getItem('precio_boleto_rifa')) {
+            precioInput.value = localStorage.getItem('precio_boleto_rifa');
+        }
+        if (localStorage.getItem('titulo_rifa')) {
+            inputTitulo.value = localStorage.getItem('titulo_rifa');
+            tituloRifa.innerText = `🎟️ ${inputTitulo.value}`;
+        }
+        if (localStorage.getItem('fecha_rifa')) {
+            inputFecha.value = localStorage.getItem('fecha_rifa');
+            fechaSorteoTexto.innerText = inputFecha.value;
         }
 
-        // Guardar precio en localStorage cuando cambie
+        // Guardar cambios automáticamente
         precioInput.addEventListener('input', () => {
             localStorage.setItem('precio_boleto_rifa', precioInput.value);
             renderizar(buscador.value);
         });
 
         inputTitulo.addEventListener('input', () => {
+            localStorage.setItem('titulo_rifa', inputTitulo.value);
             tituloRifa.innerText = `🎟️ ${inputTitulo.value}`;
         });
+
         inputFecha.addEventListener('input', () => {
+            localStorage.setItem('fecha_rifa', inputFecha.value);
             fechaSorteoTexto.innerText = inputFecha.value;
         });
 
@@ -217,7 +225,7 @@
 
         window.editarBoleto = function(num, nom, tel, est) {
             document.getElementById('numero').value = num;
-            document.getElementById('numero').readOnly = true; // No deja cambiar el número para no duplicar
+            document.getElementById('numero').readOnly = true; 
             document.getElementById('nombre').value = nom;
             document.getElementById('telefono').value = tel === '---' ? '' : tel;
             document.getElementById('estado').value = est;
