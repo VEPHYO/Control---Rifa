@@ -39,7 +39,7 @@
 
         <!-- Formulario -->
         <div class="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4 text-slate-700">Registrar Número</h2>
+            <h2 id="formTitulo" class="text-xl font-semibold mb-4 text-slate-700">Registrar Número</h2>
             <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">N° de Rifa</label>
@@ -80,10 +80,11 @@
                             <th class="p-3">Comprador</th>
                             <th class="p-3">Teléfono</th>
                             <th class="p-3">Estado</th>
+                            <th class="p-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRegistros" class="divide-y text-sm">
-                        <tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando datos...</td></tr>
+                        <tr><td colspan="5" class="p-4 text-center text-slate-400">Cargando datos...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -91,8 +92,8 @@
     </div>
 
     <script>
-        // ⚠️ REEMPLAZA ESTA URL POR TU ENLACE DE GOOGLE APPS SCRIPT SI ES NECESARIO
-        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+        // ⚠️ REEMPLAZA ESTA URL POR TU ENLACE DE GOOGLE APPS SCRIPT
+        const URL_API = 'PEGA_AQUÍ_TU_URL_DE_GOOGLE_APPS_SCRIPT';
         
         let registros = [];
 
@@ -112,7 +113,7 @@
                 registros = await respuesta.json();
                 renderizar();
             } catch (error) {
-                tabla.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error al cargar datos. Verifica la URL.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Error al cargar datos. Verifica la URL.</td></tr>`;
             }
         }
 
@@ -146,6 +147,16 @@
             }
         });
 
+        // Función para cargar los datos en el formulario y editarlos/actualizarlos
+        window.editarBoleto = function(num, nom, tel, est) {
+            document.getElementById('numero').value = num;
+            document.getElementById('nombre').value = nom;
+            document.getElementById('telefono').value = tel === '---' ? '' : tel;
+            document.getElementById('estado').value = est;
+            document.getElementById('numero').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         buscador.addEventListener('input', (e) => {
             renderizar(e.target.value);
         });
@@ -162,10 +173,10 @@
             });
 
             if(filtrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay registros encontrados</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay registros encontrados</td></tr>`;
+                return;
             }
 
-            // Ordenar por número
             filtrados.sort((a, b) => {
                 const numA = parseInt(a.Numero || a.numero || 0);
                 const numB = parseInt(b.Numero || b.numero || 0);
@@ -190,18 +201,19 @@
                             ${est}
                         </span>
                     </td>
+                    <td class="p-3 text-center">
+                        <button onclick="editarBoleto('${num}', '${nom}', '${tel}', '${est}')" class="bg-slate-100 hover:bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded font-semibold transition">Editar / Cambiar</button>
+                    </td>
                 `;
                 tabla.appendChild(tr);
             });
 
-            // Actualizar resumen en Soles (S/)
             const totalMonto = pagadosCount * precioBoleto;
             document.getElementById('totalRecaudado').innerText = `S/ ${totalMonto.toFixed(2)}`;
             document.getElementById('totalVendidos').innerText = registros.length;
             document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length);
         }
 
-        // Cargar al iniciar
         cargarDatos();
     </script>
 </body>
