@@ -17,30 +17,33 @@
             <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Sistema de inventario y gestión en tiempo real</p>
             
             <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-semibold">
-                📅 Fecha del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Por definir</span>
+                📅 Fecha del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Cargando...</span>
             </div>
         </header>
 
-        <!-- Personalización y Configuración -->
+        <!-- Ajustes Globales Compartidos -->
         <details class="bg-white shadow-sm rounded-xl p-4 mb-6 border border-slate-200 text-sm">
             <summary class="font-semibold text-indigo-600 cursor-pointer select-none flex items-center justify-between">
-                <span>⚙️ Ajustes del Evento, Fecha y Precio</span>
-                <span class="text-xs text-slate-400">Haz clic aquí para cambiar</span>
+                <span>⚙️ Ajustes del Evento (Se guardan para todos tus compañeros)</span>
+                <span class="text-xs text-slate-400">Desplegar</span>
             </summary>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3 border-t border-slate-100">
+            <form id="configForm" class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4 pt-3 border-t border-slate-100 items-end">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre de la Actividad</label>
-                    <input type="text" id="inputTitulo" value="Gran Rifa Pro-Fondos" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Actividad</label>
+                    <input type="text" id="inputTitulo" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha del Sorteo</label>
-                    <input type="text" id="inputFecha" value="Por definir" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="inputFecha" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Precio por Boleto (S/)</label>
-                    <input type="number" id="precioBoletoInput" value="10" min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Precio Boleto (S/)</label>
+                    <input type="number" id="precioBoletoInput" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-            </div>
+                <div>
+                    <button type="submit" id="btnGuardarConfig" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-2 text-xs rounded-lg transition">Guardar Evento</button>
+                </div>
+            </form>
         </details>
 
         <!-- Estadísticas -->
@@ -139,59 +142,77 @@
         const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
         
         let registros = [];
+        let precioActual = 10;
 
         const form = document.getElementById('rifaForm');
+        const configForm = document.getElementById('configForm');
         const tabla = document.getElementById('tablaRegistros');
         const buscador = document.getElementById('buscador');
         const btnGuardar = document.getElementById('btnGuardar');
-        const precioInput = document.getElementById('precioBoletoInput');
+        const btnGuardarConfig = document.getElementById('btnGuardarConfig');
         
         const inputTitulo = document.getElementById('inputTitulo');
         const inputFecha = document.getElementById('inputFecha');
+        const precioBoletoInput = document.getElementById('precioBoletoInput');
         const tituloRifa = document.getElementById('tituloRifa');
         const fechaSorteoTexto = document.getElementById('fechaSorteoTexto');
         const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
         const formTitulo = document.getElementById('formTitulo');
 
-        // Cargar datos guardados en el navegador
-        if (localStorage.getItem('precio_boleto_rifa')) {
-            precioInput.value = localStorage.getItem('precio_boleto_rifa');
-        }
-        if (localStorage.getItem('titulo_rifa')) {
-            inputTitulo.value = localStorage.getItem('titulo_rifa');
-            tituloRifa.innerText = `🎟️ ${inputTitulo.value}`;
-        }
-        if (localStorage.getItem('fecha_rifa')) {
-            inputFecha.value = localStorage.getItem('fecha_rifa');
-            fechaSorteoTexto.innerText = inputFecha.value;
-        }
-
-        // Guardar cambios automáticamente
-        precioInput.addEventListener('input', () => {
-            localStorage.setItem('precio_boleto_rifa', precioInput.value);
-            renderizar(buscador.value);
-        });
-
-        inputTitulo.addEventListener('input', () => {
-            localStorage.setItem('titulo_rifa', inputTitulo.value);
-            tituloRifa.innerText = `🎟️ ${inputTitulo.value}`;
-        });
-
-        inputFecha.addEventListener('input', () => {
-            localStorage.setItem('fecha_rifa', inputFecha.value);
-            fechaSorteoTexto.innerText = inputFecha.value;
-        });
-
         async function cargarDatos() {
             try {
                 let respuesta = await fetch(URL_API);
-                registros = await respuesta.json();
+                let res = await respuesta.json();
+                
+                registros = res.boletos || [];
+                
+                if (res.config) {
+                    inputTitulo.value = res.config.titulo;
+                    inputFecha.value = res.config.fecha;
+                    precioBoletoInput.value = res.config.precio;
+                    precioActual = parseFloat(res.config.precio) || 10;
+
+                    tituloRifa.innerText = `🎟️ ${res.config.titulo}`;
+                    fechaSorteoTexto.innerText = res.config.fecha;
+                }
+
                 renderizar();
             } catch (error) {
                 tabla.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error al cargar datos. Verifica la URL.</td></tr>`;
             }
         }
 
+        // Guardar configuración del evento (Título, Fecha, Precio) para TODOS
+        configForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnGuardarConfig.innerText = 'Guardando...';
+            btnGuardarConfig.disabled = true;
+
+            const configNuevas = {
+                action: 'updateConfig',
+                titulo: inputTitulo.value,
+                fecha: inputFecha.value,
+                precio: precioBoletoInput.value
+            };
+
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(configNuevas)
+                });
+
+                setTimeout(cargarDatos, 1200);
+            } catch (error) {
+                alert('Error al guardar la configuración.');
+            } finally {
+                btnGuardarConfig.innerText = 'Guardar Evento';
+                btnGuardarConfig.disabled = false;
+            }
+        });
+
+        // Registrar / Editar boleto
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnGuardar.innerText = 'Guardando...';
@@ -223,6 +244,24 @@
             }
         });
 
+        // Eliminar boleto
+        window.eliminarBoleto = async function(num) {
+            if (!confirm(`¿Estás seguro de eliminar el boleto #${num}?`)) return;
+
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', numero: num })
+                });
+
+                setTimeout(cargarDatos, 1200);
+            } catch (error) {
+                alert('Error al eliminar.');
+            }
+        }
+
         window.editarBoleto = function(num, nom, tel, est) {
             document.getElementById('numero').value = num;
             document.getElementById('numero').readOnly = true; 
@@ -251,11 +290,10 @@
         function renderizar(filtro = '') {
             tabla.innerHTML = '';
             let pagadosCount = 0;
-            const precioBoleto = parseFloat(precioInput.value) || 0;
 
             const filtrados = registros.filter(r => {
-                const nombreVal = String(r.nombre || r.Nombre || '').toLowerCase();
-                const numVal = String(r.numero || r.Numero || '');
+                const nombreVal = String(r.nombre || '').toLowerCase();
+                const numVal = String(r.numero || '');
                 return nombreVal.includes(filtro.toLowerCase()) || numVal.includes(filtro);
             });
 
@@ -264,17 +302,13 @@
                 return;
             }
 
-            filtrados.sort((a, b) => {
-                const numA = parseInt(a.numero || a.Numero || 0);
-                const numB = parseInt(b.numero || b.Numero || 0);
-                return numA - numB;
-            });
+            filtrados.sort((a, b) => parseInt(a.numero || 0) - parseInt(b.numero || 0));
 
             filtrados.forEach(r => {
-                const num = r.numero || r.Numero || '---';
-                const nom = r.nombre || r.Nombre || '---';
-                const tel = r.telefono || r.Telefono || '---';
-                const est = r.estado || r.Estado || 'Pendiente';
+                const num = r.numero || '---';
+                const nom = r.nombre || '---';
+                const tel = r.telefono || '---';
+                const est = r.estado || 'Pendiente';
 
                 if(est === 'Pagado') pagadosCount++;
                 
@@ -289,14 +323,15 @@
                             ${est}
                         </span>
                     </td>
-                    <td class="p-4 text-center">
-                        <button onclick="editarBoleto('${num}', '${nom}', '${tel}', '${est}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs px-3 py-1.5 rounded-lg font-bold transition">Editar</button>
+                    <td class="p-4 text-center space-x-1">
+                        <button onclick="editarBoleto('${num}', '${nom}', '${tel}', '${est}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">Editar</button>
+                        <button onclick="eliminarBoleto('${num}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">Eliminar</button>
                     </td>
                 `;
                 tabla.appendChild(tr);
             });
 
-            const totalMonto = pagadosCount * precioBoleto;
+            const totalMonto = pagadosCount * precioActual;
             document.getElementById('totalRecaudado').innerText = `S/ ${totalMonto.toFixed(2)}`;
             document.getElementById('totalVendidos').innerText = registros.length;
             document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length);
