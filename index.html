@@ -3,30 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gran Rifa Proyectada - Control de Boletos</title>
-    <!-- Tailwind CSS -->
+    <title>Gran Rifa - Control de Boletos</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-indigo-50 text-slate-800 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
         
-        <!-- Header / Información de la Rifa -->
+        <!-- Header / Información del Evento -->
         <header class="bg-white shadow-xl rounded-2xl p-6 md:p-8 mb-6 border border-slate-100 text-center relative overflow-hidden">
             <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
             <span class="bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Sorteo Oficial</span>
             <h1 id="tituloRifa" class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 mb-2">🎟️ Gran Rifa Pro-Fondos</h1>
-            <p id="descripcionRifa" class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Ayúdanos a alcanzar nuestra meta. ¡Participa y gana increíbles premios!</p>
+            <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Sistema de inventario y gestión en tiempo real</p>
             
             <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-semibold">
-                📅 Día del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Próximamente</span>
+                📅 Fecha del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Por definir</span>
             </div>
         </header>
 
-        <!-- Configuración de Detalles de la Rifa (Ocultable o editable) -->
+        <!-- Personalización y Precio del Boleto -->
         <details class="bg-white shadow-sm rounded-xl p-4 mb-6 border border-slate-200 text-sm">
             <summary class="font-semibold text-indigo-600 cursor-pointer select-none flex items-center justify-between">
-                <span>⚙️ Personalizar datos del evento (Título, Actividad y Fecha)</span>
-                <span class="text-xs text-slate-400">Clic para desplegar</span>
+                <span>⚙️ Ajustes del Evento y Precio del Boleto</span>
+                <span class="text-xs text-slate-400">Haz clic aquí para cambiar</span>
             </summary>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3 border-t border-slate-100">
                 <div>
@@ -35,16 +34,16 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha del Sorteo</label>
-                    <input type="text" id="inputFecha" value="30 de Noviembre, 2026" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="inputFecha" value="Próximamente" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Precio por Boleto (S/)</label>
-                    <input type="number" id="precioBoletoInput" value="5" min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="number" id="precioBoletoInput" value="10" min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
             </div>
         </details>
 
-        <!-- Estadísticas Modernas -->
+        <!-- Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
@@ -69,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Formulario de Registro / Edición -->
+        <!-- Formulario -->
         <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8 mb-6 border border-slate-100">
             <div class="flex justify-between items-center mb-4">
                 <h2 id="formTitulo" class="text-xl font-bold text-slate-800">Registrar Nuevo Boleto</h2>
@@ -83,7 +82,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Comprador</label>
-                    <input type="text" id="nombre" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50" placeholder="Nombre completo">
+                    <input type="text" id="nombre" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50" placeholder="Nombre">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
@@ -102,12 +101,12 @@
             </form>
         </div>
 
-        <!-- Inventario / Tabla -->
+        <!-- Tabla -->
         <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8 border border-slate-100">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Inventario de Boletos</h2>
-                    <p class="text-xs text-slate-400">Sincronizado en tiempo real con tu equipo</p>
+                    <p class="text-xs text-slate-400">Sincronizado en tiempo real</p>
                 </div>
                 <div class="relative w-full md:w-80">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
@@ -136,8 +135,8 @@
     </div>
 
     <script>
-        // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE DE GOOGLE APPS SCRIPT
-        const URL_API = 'PEGA_AQUÍ_TU_URL_DE_GOOGLE_APPS_SCRIPT';
+        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
         
         let registros = [];
 
@@ -154,16 +153,25 @@
         const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
         const formTitulo = document.getElementById('formTitulo');
 
-        // Actualizar textos dinámicos del banner superior
+        // Cargar precio guardado previamente o usar 10 por defecto
+        const precioGuardado = localStorage.getItem('precio_boleto_rifa');
+        if (precioGuardado) {
+            precioInput.value = precioGuardado;
+        } else {
+            precioInput.value = "10";
+        }
+
+        // Guardar precio en localStorage cuando cambie
+        precioInput.addEventListener('input', () => {
+            localStorage.setItem('precio_boleto_rifa', precioInput.value);
+            renderizar(buscador.value);
+        });
+
         inputTitulo.addEventListener('input', () => {
             tituloRifa.innerText = `🎟️ ${inputTitulo.value}`;
         });
         inputFecha.addEventListener('input', () => {
             fechaSorteoTexto.innerText = inputFecha.value;
-        });
-
-        precioInput.addEventListener('input', () => {
-            renderizar(buscador.value);
         });
 
         async function cargarDatos() {
@@ -172,7 +180,7 @@
                 registros = await respuesta.json();
                 renderizar();
             } catch (error) {
-                tabla.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error al cargar datos. Verifica tu conexión o URL de Apps Script.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error al cargar datos. Verifica la URL.</td></tr>`;
             }
         }
 
@@ -209,19 +217,19 @@
 
         window.editarBoleto = function(num, nom, tel, est) {
             document.getElementById('numero').value = num;
-            document.getElementById('numero').disabled = true; // Bloquear número al editar para evitar conflictos
+            document.getElementById('numero').readOnly = true; // No deja cambiar el número para no duplicar
             document.getElementById('nombre').value = nom;
             document.getElementById('telefono').value = tel === '---' ? '' : tel;
             document.getElementById('estado').value = est;
             
             formTitulo.innerText = `✏️ Editando Boleto #${num}`;
-            btnGuardar.innerText = 'Actualizar Cambio';
+            btnGuardar.innerText = 'Actualizar Estado';
             btnCancelarEdicion.classList.remove('hidden');
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
         window.cancelarEdicion = function() {
-            document.getElementById('numero').disabled = false;
+            document.getElementById('numero').readOnly = false;
             form.reset();
             formTitulo.innerText = 'Registrar Nuevo Boleto';
             btnGuardar.innerText = 'Guardar';
@@ -238,8 +246,8 @@
             const precioBoleto = parseFloat(precioInput.value) || 0;
 
             const filtrados = registros.filter(r => {
-                const nombreVal = String(r.Nombre || r.nombre || '').toLowerCase();
-                const numVal = String(r.Numero || r.numero || '');
+                const nombreVal = String(r.nombre || r.Nombre || '').toLowerCase();
+                const numVal = String(r.numero || r.Numero || '');
                 return nombreVal.includes(filtro.toLowerCase()) || numVal.includes(filtro);
             });
 
@@ -249,16 +257,16 @@
             }
 
             filtrados.sort((a, b) => {
-                const numA = parseInt(a.Numero || a.numero || 0);
-                const numB = parseInt(b.Numero || b.numero || 0);
+                const numA = parseInt(a.numero || a.Numero || 0);
+                const numB = parseInt(b.numero || b.Numero || 0);
                 return numA - numB;
             });
 
             filtrados.forEach(r => {
-                const num = r.Numero || r.numero || '---';
-                const nom = r.Nombre || r.nombre || '---';
-                const tel = r.Telefono || r.telefono || '---';
-                const est = r.Estado || r.estado || 'Pendiente';
+                const num = r.numero || r.Numero || '---';
+                const nom = r.nombre || r.Nombre || '---';
+                const tel = r.telefono || r.Telefono || '---';
+                const est = r.estado || r.Estado || 'Pendiente';
 
                 if(est === 'Pagado') pagadosCount++;
                 
