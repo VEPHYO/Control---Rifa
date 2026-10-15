@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Rifa</title>
-    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <title>Control de Rifa Compartido</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
-        <!-- Título -->
         <header class="bg-white shadow rounded-lg p-6 mb-6 text-center">
-            <h1 class="text-3xl font-bold text-indigo-600 mb-2">🎟️ Control de Rifa</h1>
-            <p class="text-slate-500">Gestiona tus números vendidos y pendientes de forma rápida</p>
+            <h1 class="text-3xl font-bold text-indigo-600 mb-2">🎟️ Control de Rifa en Equipo</h1>
+            <p class="text-slate-500">Sincronizado en tiempo real</p>
         </header>
 
-        <!-- Resumen / Estadísticas -->
+        <!-- Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow border-l-4 border-indigo-500">
                 <p class="text-sm text-slate-500">Total Recaudado</p>
@@ -31,7 +29,7 @@
             </div>
         </div>
 
-        <!-- Formulario de Registro -->
+        <!-- Formulario -->
         <div class="bg-white shadow rounded-lg p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4 text-slate-700">Registrar Número</h2>
             <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -41,7 +39,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Comprador</label>
-                    <input type="text" id="nombre" required class="w-full border rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nombre y Apellido">
+                    <input type="text" id="nombre" required class="w-full border rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nombre">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Teléfono</label>
@@ -55,18 +53,17 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded transition">Guardar</button>
+                    <button type="submit" id="btnGuardar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-2 rounded transition">Guardar</button>
                 </div>
             </form>
         </div>
 
-        <!-- Buscador y Tabla -->
+        <!-- Tabla -->
         <div class="bg-white shadow rounded-lg p-6">
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                <h2 class="text-xl font-semibold text-slate-700">Inventario de Boletos</h2>
-                <input type="text" id="buscador" placeholder="🔍 Buscar por nombre o número..." class="border rounded p-2 w-full md:w-72 focus:ring-2 focus:ring-indigo-500 outline-none">
+                <h2 class="text-xl font-semibold text-slate-700">Inventario Actualizado</h2>
+                <input type="text" id="buscador" placeholder="🔍 Buscar..." class="border rounded p-2 w-full md:w-72 focus:ring-2 focus:ring-indigo-500 outline-none">
             </div>
-            
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -75,58 +72,67 @@
                             <th class="p-3">Comprador</th>
                             <th class="p-3">Teléfono</th>
                             <th class="p-3">Estado</th>
-                            <th class="p-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRegistros" class="divide-y text-sm">
-                        <!-- Los datos se cargan dinámicamente -->
+                        <tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando datos...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Lógica de la aplicación -->
     <script>
-        let registros = JSON.parse(localStorage.getItem('rifa_registros')) || [];
-        const precioBoleto = 10; // Cambia esto si el boleto cuesta otro monto
+        // ⚠️ CAMBIA ESTA URL POR LA QUE TE DIO GOOGLE APPS SCRIPT
+        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+        
+        let registros = [];
+        const precioBoleto = 10; // Cambia el precio si lo necesitas
 
         const form = document.getElementById('rifaForm');
         const tabla = document.getElementById('tablaRegistros');
         const buscador = document.getElementById('buscador');
+        const btnGuardar = document.getElementById('btnGuardar');
 
-        function guardarDatos() {
-            localStorage.setItem('rifa_registros', JSON.stringify(registros));
-            renderizar();
+        async function cargarDatos() {
+            try {
+                let respuesta = await fetch(URL_API);
+                registros = await respuesta.json();
+                renderizar();
+            } catch (error) {
+                tabla.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error al cargar datos. Verifica la URL.</td></tr>`;
+            }
         }
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const numero = document.getElementById('numero').value;
-            const nombre = document.getElementById('nombre').value;
-            const telefono = document.getElementById('telefono').value;
-            const estado = document.getElementById('estado').value;
+            btnGuardar.innerText = 'Guardando...';
+            btnGuardar.disabled = true;
 
-            // Verificar si el número ya existe
-            const existe = registros.find(r => r.numero === numero);
-            if(existe) {
-                alert('¡Este número ya está registrado!');
-                return;
+            const datosNuevos = {
+                numero: document.getElementById('numero').value,
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value || '---',
+                estado: document.getElementById('estado').value
+            };
+
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosNuevos)
+                });
+
+                form.reset();
+                setTimeout(cargarDatos, 1500); // Recargar la tabla después de 1.5s
+            } catch (error) {
+                alert('Hubo un error al guardar.');
+            } finally {
+                btnGuardar.innerText = 'Guardar';
+                btnGuardar.disabled = false;
             }
-
-            registros.push({ numero, nombre, telefono, estado });
-            registros.sort((a, b) => a.numero - b.numero);
-            
-            guardarDatos();
-            form.reset();
         });
-
-        window.eliminar = function(numero) {
-            if(confirm(`¿Eliminar el boleto ${numero}?`)) {
-                registros = registros.filter(r => r.numero !== numero);
-                guardarDatos();
-            }
-        }
 
         buscador.addEventListener('input', (e) => {
             renderizar(e.target.value);
@@ -137,41 +143,39 @@
             let pagadosCount = 0;
             
             const filtrados = registros.filter(r => 
-                r.nombre.toLowerCase().includes(filtro.toLowerCase()) || 
-                r.numero.includes(filtro)
+                String(r.Nombre || '').toLowerCase().includes(filtro.toLowerCase()) || 
+                String(r.Numero || '').includes(filtro)
             );
 
             if(filtrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay registros encontrados</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay registros encontrados</td></tr>`;
+                return;
             }
 
             filtrados.forEach(r => {
-                if(r.estado === 'Pagado') pagadosCount++;
+                if(r.Estado === 'Pagado') pagadosCount++;
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-bold text-indigo-600">#${r.numero}</td>
-                    <td class="p-3">${r.nombre}</td>
-                    <td class="p-3">${r.telefono || '---'}</td>
+                    <td class="p-3 font-bold text-indigo-600">#${r.Numero}</td>
+                    <td class="p-3">${r.Nombre}</td>
+                    <td class="p-3">${r.Telefono}</td>
                     <td class="p-3">
-                        <span class="px-2 py-1 rounded text-xs font-semibold ${r.estado === 'Pagado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                            ${r.estado}
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${r.Estado === 'Pagado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                            ${r.Estado}
                         </span>
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="eliminar('${r.numero}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Eliminar</button>
                     </td>
                 `;
                 tabla.appendChild(tr);
             });
 
-            // Actualizar estadísticas
             document.getElementById('totalRecaudado').innerText = `$${pagadosCount * precioBoleto}`;
             document.getElementById('totalVendidos').innerText = registros.length;
-            document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length); // Asumiendo 100 números en total (puedes cambiarlo)
+            document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length);
         }
 
-        renderizar();
+        // Cargar al iniciar
+        cargarDatos();
     </script>
 </body>
 </html>
