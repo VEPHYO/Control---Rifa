@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Rifa Compartido</title>
+    <title>Control de Rifa en Equipo</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
@@ -13,19 +13,27 @@
             <p class="text-slate-500">Sincronizado en tiempo real</p>
         </header>
 
-        <!-- Estadísticas -->
+        <!-- Configuración de Precio y Estadísticas -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-semibold text-slate-700">Precio por Boleto (S/):</label>
+                <input type="number" id="precioBoletoInput" value="5" min="1" class="w-24 border rounded p-1 text-center font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <p class="text-xs text-slate-400">Puedes cambiar el precio en cualquier momento</p>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow border-l-4 border-indigo-500">
                 <p class="text-sm text-slate-500">Total Recaudado</p>
-                <p id="totalRecaudado" class="text-2xl font-bold text-slate-700">$0</p>
+                <p id="totalRecaudado" class="text-2xl font-bold text-slate-700">S/ 0.00</p>
             </div>
             <div class="bg-white p-4 rounded-lg shadow border-l-4 border-emerald-500">
                 <p class="text-sm text-slate-500">Números Vendidos</p>
                 <p id="totalVendidos" class="text-2xl font-bold text-emerald-600">0</p>
             </div>
             <div class="bg-white p-4 rounded-lg shadow border-l-4 border-amber-500">
-                <p class="text-sm text-slate-500">Disponibles</p>
-                <p id="totalDisponibles" class="text-2xl font-bold text-amber-600">0</p>
+                <p class="text-sm text-slate-500">Disponibles (de 100)</p>
+                <p id="totalDisponibles" class="text-2xl font-bold text-amber-600">100</p>
             </div>
         </div>
 
@@ -35,7 +43,7 @@
             <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">N° de Rifa</label>
-                    <input type="number" id="numero" required class="w-full border rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. 001">
+                    <input type="number" id="numero" required class="w-full border rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. 1">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Comprador</label>
@@ -83,16 +91,20 @@
     </div>
 
     <script>
-        // ⚠️ CAMBIA ESTA URL POR LA QUE TE DIO GOOGLE APPS SCRIPT
+        // ⚠️ REEMPLAZA ESTA URL POR TU ENLACE DE GOOGLE APPS SCRIPT SI ES NECESARIO
         const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
         
         let registros = [];
-        const precioBoleto = 10; // Cambia el precio si lo necesitas
 
         const form = document.getElementById('rifaForm');
         const tabla = document.getElementById('tablaRegistros');
         const buscador = document.getElementById('buscador');
         const btnGuardar = document.getElementById('btnGuardar');
+        const precioInput = document.getElementById('precioBoletoInput');
+
+        precioInput.addEventListener('input', () => {
+            renderizar(buscador.value);
+        });
 
         async function cargarDatos() {
             try {
@@ -125,7 +137,7 @@
                 });
 
                 form.reset();
-                setTimeout(cargarDatos, 1500); // Recargar la tabla después de 1.5s
+                setTimeout(cargarDatos, 1500);
             } catch (error) {
                 alert('Hubo un error al guardar.');
             } finally {
@@ -141,35 +153,50 @@
         function renderizar(filtro = '') {
             tabla.innerHTML = '';
             let pagadosCount = 0;
-            
-            const filtrados = registros.filter(r => 
-                String(r.Nombre || '').toLowerCase().includes(filtro.toLowerCase()) || 
-                String(r.Numero || '').includes(filtro)
-            );
+            const precioBoleto = parseFloat(precioInput.value) || 0;
+
+            const filtrados = registros.filter(r => {
+                const nombreVal = String(r.Nombre || r.nombre || '').toLowerCase();
+                const numVal = String(r.Numero || r.numero || '');
+                return nombreVal.includes(filtro.toLowerCase()) || numVal.includes(filtro);
+            });
 
             if(filtrados.length === 0) {
                 tabla.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay registros encontrados</td></tr>`;
-                return;
             }
 
+            // Ordenar por número
+            filtrados.sort((a, b) => {
+                const numA = parseInt(a.Numero || a.numero || 0);
+                const numB = parseInt(b.Numero || b.numero || 0);
+                return numA - numB;
+            });
+
             filtrados.forEach(r => {
-                if(r.Estado === 'Pagado') pagadosCount++;
+                const num = r.Numero || r.numero || '---';
+                const nom = r.Nombre || r.nombre || '---';
+                const tel = r.Telefono || r.telefono || '---';
+                const est = r.Estado || r.estado || 'Pendiente';
+
+                if(est === 'Pagado') pagadosCount++;
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-bold text-indigo-600">#${r.Numero}</td>
-                    <td class="p-3">${r.Nombre}</td>
-                    <td class="p-3">${r.Telefono}</td>
+                    <td class="p-3 font-bold text-indigo-600">#${num}</td>
+                    <td class="p-3">${nom}</td>
+                    <td class="p-3">${tel}</td>
                     <td class="p-3">
-                        <span class="px-2 py-1 rounded text-xs font-semibold ${r.Estado === 'Pagado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                            ${r.Estado}
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${est === 'Pagado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                            ${est}
                         </span>
                     </td>
                 `;
                 tabla.appendChild(tr);
             });
 
-            document.getElementById('totalRecaudado').innerText = `$${pagadosCount * precioBoleto}`;
+            // Actualizar resumen en Soles (S/)
+            const totalMonto = pagadosCount * precioBoleto;
+            document.getElementById('totalRecaudado').innerText = `S/ ${totalMonto.toFixed(2)}`;
             document.getElementById('totalVendidos').innerText = registros.length;
             document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length);
         }
