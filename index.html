@@ -14,7 +14,7 @@
             <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
             <span class="bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Sorteo Oficial</span>
             <h1 id="tituloRifa" class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 mb-2">🎟️ Gran Rifa Pro-Fondos</h1>
-            <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Sistema de inventario y gestión en tiempo real</p>
+            <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Oferta activa: 1 boleto por S/ 10 o 2 por S/ 15</p>
             
             <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-semibold">
                 📅 Fecha del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Cargando...</span>
@@ -27,7 +27,7 @@
                 <span>⚙️ Ajustes del Evento (Se guardan para todos tus compañeros)</span>
                 <span class="text-xs text-slate-400">Desplegar</span>
             </summary>
-            <form id="configForm" class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4 pt-3 border-t border-slate-100 items-end">
+            <form id="configForm" class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3 border-t border-slate-100 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Actividad</label>
                     <input type="text" id="inputTitulo" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -35,10 +35,6 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha del Sorteo</label>
                     <input type="text" id="inputFecha" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Precio Boleto (S/)</label>
-                    <input type="number" id="precioBoletoInput" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <button type="submit" id="btnGuardarConfig" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-2 text-xs rounded-lg transition">Guardar Evento</button>
@@ -50,7 +46,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recaudado</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recaudado (Con Oferta)</p>
                     <p id="totalRecaudado" class="text-3xl font-extrabold text-indigo-600 mt-1">S/ 0.00</p>
                 </div>
                 <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600 text-xl">💰</div>
@@ -71,17 +67,18 @@
             </div>
         </div>
 
-        <!-- Formulario -->
+        <!-- Formulario (Permite ingresar varios números separados por comas, ej: 12, 13) -->
         <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8 mb-6 border border-slate-100">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="formTitulo" class="text-xl font-bold text-slate-800">Registrar Nuevo Boleto</h2>
+                <h2 id="formTitulo" class="text-xl font-bold text-slate-800">Registrar Boletos</h2>
                 <button type="button" id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-red-500 font-semibold hover:underline">Cancelar edición</button>
             </div>
+            <p class="text-xs text-slate-500 mb-4">💡 Si un comprador adquiere varios números, puedes ingresarlos juntos separados por comas (Ej: <span class="font-bold text-indigo-600">15, 16</span>) para que la oferta de 2 x 15 se calcule sola.</p>
             
             <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">N° de Boleto</label>
-                    <input type="number" id="numero" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-indigo-600 bg-slate-50" placeholder="Ej. 1">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">N° de Boleto(s)</label>
+                    <input type="text" id="numero" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-indigo-600 bg-slate-50" placeholder="Ej. 1 o 10, 11">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Comprador</label>
@@ -139,10 +136,9 @@
 
     <script>
         // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+        const URL_API = 'PEGA_AQUÍ_TU_URL_DE_GOOGLE_APPS_SCRIPT';
         
         let registros = [];
-        let precioActual = 10;
 
         const form = document.getElementById('rifaForm');
         const configForm = document.getElementById('configForm');
@@ -153,7 +149,6 @@
         
         const inputTitulo = document.getElementById('inputTitulo');
         const inputFecha = document.getElementById('inputFecha');
-        const precioBoletoInput = document.getElementById('precioBoletoInput');
         const tituloRifa = document.getElementById('tituloRifa');
         const fechaSorteoTexto = document.getElementById('fechaSorteoTexto');
         const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
@@ -169,8 +164,6 @@
                 if (res.config) {
                     inputTitulo.value = res.config.titulo;
                     inputFecha.value = res.config.fecha;
-                    precioBoletoInput.value = res.config.precio;
-                    precioActual = parseFloat(res.config.precio) || 10;
 
                     tituloRifa.innerText = `🎟️ ${res.config.titulo}`;
                     fechaSorteoTexto.innerText = res.config.fecha;
@@ -182,7 +175,6 @@
             }
         }
 
-        // Guardar configuración del evento (Título, Fecha, Precio) para TODOS
         configForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnGuardarConfig.innerText = 'Guardando...';
@@ -192,7 +184,7 @@
                 action: 'updateConfig',
                 titulo: inputTitulo.value,
                 fecha: inputFecha.value,
-                precio: precioBoletoInput.value
+                precio: "10" // Mantenido internamente
             };
 
             try {
@@ -212,7 +204,6 @@
             }
         });
 
-        // Registrar / Editar boleto
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnGuardar.innerText = 'Guardando...';
@@ -244,7 +235,6 @@
             }
         });
 
-        // Eliminar boleto
         window.eliminarBoleto = async function(num) {
             if (!confirm(`¿Estás seguro de eliminar el boleto #${num}?`)) return;
 
@@ -264,21 +254,19 @@
 
         window.editarBoleto = function(num, nom, tel, est) {
             document.getElementById('numero').value = num;
-            document.getElementById('numero').readOnly = true; 
             document.getElementById('nombre').value = nom;
             document.getElementById('telefono').value = tel === '---' ? '' : tel;
             document.getElementById('estado').value = est;
             
             formTitulo.innerText = `✏️ Editando Boleto #${num}`;
-            btnGuardar.innerText = 'Actualizar Estado';
+            btnGuardar.innerText = 'Actualizar Registro';
             btnCancelarEdicion.classList.remove('hidden');
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
         window.cancelarEdicion = function() {
-            document.getElementById('numero').readOnly = false;
             form.reset();
-            formTitulo.innerText = 'Registrar Nuevo Boleto';
+            formTitulo.innerText = 'Registrar Boletos';
             btnGuardar.innerText = 'Guardar';
             btnCancelarEdicion.classList.add('hidden');
         }
@@ -287,9 +275,24 @@
             renderizar(e.target.value);
         });
 
+        function calcularTotalRecaudado(boletosPagados) {
+            // Contamos cuántos boletos pagados hay en total
+            let totalBoletos = 0;
+            boletosPagados.forEach(r => {
+                const nums = String(r.numero || '').split(',');
+                totalBoletos += nums.length;
+            });
+
+            // Aplicar la regla de oferta: 2 por 15 (o pairs de 2 a S/ 15, y sueltos a S/ 10)
+            const pares = Math.floor(totalBoletos / 2);
+            const sueltos = totalBoletos % 2;
+            
+            return (pares * 15) + (sueltos * 10);
+        }
+
         function renderizar(filtro = '') {
             tabla.innerHTML = '';
-            let pagadosCount = 0;
+            let pagadosList = [];
 
             const filtrados = registros.filter(r => {
                 const nombreVal = String(r.nombre || '').toLowerCase();
@@ -302,15 +305,15 @@
                 return;
             }
 
-            filtrados.sort((a, b) => parseInt(a.numero || 0) - parseInt(b.numero || 0));
-
             filtrados.forEach(r => {
                 const num = r.numero || '---';
                 const nom = r.nombre || '---';
                 const tel = r.telefono || '---';
                 const est = r.estado || 'Pendiente';
 
-                if(est === 'Pagado') pagadosCount++;
+                if(est === 'Pagado') {
+                    pagadosList.push(r);
+                }
                 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -331,10 +334,18 @@
                 tabla.appendChild(tr);
             });
 
-            const totalMonto = pagadosCount * precioActual;
-            document.getElementById('totalRecaudado').innerText = `S/ ${totalMonto.toFixed(2)}`;
-            document.getElementById('totalVendidos').innerText = registros.length;
-            document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - registros.length);
+            // Contar total de boletos individuales vendidos (contando separaciones por comas)
+            let totalBoletosVendidos = 0;
+            registros.forEach(r => {
+                const nums = String(r.numero || '').split(',');
+                totalBoletosVendidos += nums.length;
+            });
+
+            const montoTotal = calcularTotalRecaudado(pagadosList);
+
+            document.getElementById('totalRecaudado').innerText = `S/ ${montoTotal.toFixed(2)}`;
+            document.getElementById('totalVendidos').innerText = totalBoletosVendidos;
+            document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - totalBoletosVendidos);
         }
 
         cargarDatos();
