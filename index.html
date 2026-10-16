@@ -3,46 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gran Rifa - Control de Boletos</title>
+    <title>Gran Rifa - Control y Generador de Tickets</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería html2canvas para generar la imagen del ticket automáticamente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .font-ticket-title { font-family: 'Playfair Display', serif; }
+        .font-ticket-body { font-family: 'Poppins', sans-serif; }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-indigo-50 text-slate-800 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
         
         <!-- Header / Información del Evento -->
         <header class="bg-white shadow-xl rounded-2xl p-6 md:p-8 mb-6 border border-slate-100 text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
-            <span class="bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Sorteo Oficial</span>
+            <div class="absolute top-0 left-0 w-2 h-full bg-emerald-600"></div>
+            <span class="bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Sorteo Oficial & Generador de Tickets</span>
             <h1 id="tituloRifa" class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 mb-2">🎟️ Gran Rifa Pro-Fondos</h1>
-            <p id="subtituloOferta" class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Cargando precios de la oferta...</p>
+            <p id="subtituloOferta" class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">Control y emisión automática de boletos</p>
             
             <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-semibold">
                 📅 Fecha del Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Cargando...</span>
             </div>
         </header>
 
-        <!-- Ajustes Globales Compartidos -->
+        <!-- Ajustes Globales -->
         <details class="bg-white shadow-sm rounded-xl p-4 mb-6 border border-slate-200 text-sm">
-            <summary class="font-semibold text-indigo-600 cursor-pointer select-none flex items-center justify-between">
-                <span>⚙️ Ajustes del Evento y Precios (Para todos tus compañeros)</span>
+            <summary class="font-semibold text-emerald-700 cursor-pointer select-none flex items-center justify-between">
+                <span>⚙️ Ajustes del Evento y Precios</span>
                 <span class="text-xs text-slate-400">Desplegar</span>
             </summary>
             <form id="configForm" class="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4 pt-3 border-t border-slate-100 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Actividad</label>
-                    <input type="text" id="inputTitulo" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="inputTitulo" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha del Sorteo</label>
-                    <input type="text" id="inputFecha" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="inputFecha" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Precio 1 Rifa (S/)</label>
-                    <input type="number" id="inputPrecio1" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="number" id="inputPrecio1" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Precio 2 Rifas (S/)</label>
-                    <input type="number" id="inputPrecio2" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="number" id="inputPrecio2" required min="1" class="w-full border rounded-lg p-2 text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
                 <div>
                     <button type="submit" id="btnGuardarConfig" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-2 text-xs rounded-lg transition">Guardar Evento</button>
@@ -55,16 +62,16 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recaudado</p>
-                    <p id="totalRecaudado" class="text-3xl font-extrabold text-indigo-600 mt-1">S/ 0.00</p>
+                    <p id="totalRecaudado" class="text-3xl font-extrabold text-emerald-600 mt-1">S/ 0.00</p>
                 </div>
-                <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600 text-xl">💰</div>
+                <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600 text-xl">💰</div>
             </div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Boletos Vendidos</p>
-                    <p id="totalVendidos" class="text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+                    <p id="totalVendidos" class="text-3xl font-extrabold text-indigo-600 mt-1">0</p>
                 </div>
-                <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600 text-xl">✅</div>
+                <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600 text-xl">✅</div>
             </div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
@@ -81,30 +88,30 @@
                 <h2 id="formTitulo" class="text-xl font-bold text-slate-800">Registrar Boletos</h2>
                 <button type="button" id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-red-500 font-semibold hover:underline">Cancelar edición</button>
             </div>
-            <p class="text-xs text-slate-500 mb-4">💡 Puedes ingresar varios números juntos separados por comas (Ej: <span class="font-bold text-indigo-600">15, 16</span>) para aplicar la oferta automáticamente.</p>
+            <p class="text-xs text-slate-500 mb-4">💡 Puedes registrar varios boletos separados por comas (Ej: <span class="font-bold text-emerald-600">15, 16</span>) para aplicar la oferta automáticamente.</p>
             
             <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">N° de Boleto(s)</label>
-                    <input type="text" id="numero" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-indigo-600 bg-slate-50" placeholder="Ej. 1 o 10, 11">
+                    <input type="text" id="numero" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-600 bg-slate-50" placeholder="Ej. 1 o 10, 11">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Comprador</label>
-                    <input type="text" id="nombre" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50" placeholder="Nombre">
+                    <input type="text" id="nombre" required class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50" placeholder="Nombre">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
-                    <input type="text" id="telefono" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50" placeholder="Opcional">
+                    <input type="text" id="telefono" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50" placeholder="Opcional">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Estado de Pago</label>
-                    <select id="estado" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 font-semibold">
+                    <select id="estado" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50 font-semibold">
                         <option value="Pagado">Pagado</option>
                         <option value="Pendiente">Pendiente</option>
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" id="btnGuardar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl shadow-lg shadow-indigo-200 transition transform active:scale-95">Guardar</button>
+                    <button type="submit" id="btnGuardar" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded-xl shadow-lg shadow-emerald-200 transition transform active:scale-95">Guardar</button>
                 </div>
             </form>
         </div>
@@ -118,7 +125,7 @@
                 </div>
                 <div class="relative w-full md:w-80">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-                    <input type="text" id="buscador" placeholder="Buscar por nombre o número..." class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
+                    <input type="text" id="buscador" placeholder="Buscar por nombre o número..." class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50">
                 </div>
             </div>
 
@@ -142,13 +149,74 @@
 
     </div>
 
+    <!-- MODAL PARA GENERAR Y DESCARGAR EL TICKET ESTILO TU IMAGEN -->
+    <div id="modalTicket" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl text-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-2">🎟️ Ticket Generado Automáticamente</h3>
+            <p class="text-xs text-slate-500 mb-4">Diseño personalizado listo para guardar o enviar por WhatsApp</p>
+            
+            <!-- CONTENEDOR DEL TICKET (Mantiene la estética exacta de tu imagen con hojas y tonos verdes) -->
+            <div class="flex justify-center my-4 overflow-x-auto">
+                <div id="ticketVisual" class="relative w-[600px] h-[220px] bg-[#fbfbf9] rounded-2xl border-2 border-emerald-800/20 shadow-lg flex items-center overflow-hidden font-ticket-body select-none">
+                    
+                    <!-- Lado izquierdo (Datos del cliente y número) -->
+                    <div class="w-[45%] h-full p-5 flex flex-col justify-between relative bg-white border-r-2 border-dashed border-emerald-600/40">
+                        <div>
+                            <!-- Caja del Número -->
+                            <div class="inline-flex items-center bg-[#4d7358] text-white px-3 py-1.5 rounded-2xl shadow-inner gap-2">
+                                <span class="text-xs font-bold tracking-wider">N°:</span>
+                                <span id="ticketNumero" class="text-lg font-extrabold tracking-wide">00</span>
+                            </div>
+                            <p class="text-[10px] text-emerald-900 font-semibold mt-1">❤️ ¡Mucha suerte! ❤️</p>
+                        </div>
+
+                        <!-- Caja del Nombre -->
+                        <div class="bg-[#f6f5f0] p-2.5 rounded-xl border border-emerald-900/10 text-left">
+                            <span class="text-[11px] font-bold text-slate-700 block">Nombre:</span>
+                            <span id="ticketNombre" class="text-xs font-semibold text-slate-900 truncate block mt-0.5 border-b border-slate-400 pb-0.5">Nombre Apellido</span>
+                        </div>
+                    </div>
+
+                    <!-- Lado derecho (Diseño botánico verde con título y fecha) -->
+                    <div class="w-[55%] h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-emerald-50/40 to-emerald-100/30 text-right">
+                        <!-- Fondo decorativo con hojas simuladas -->
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-800/5 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div class="text-right">
+                            <h2 id="ticketTituloTexto" class="font-ticket-title text-2xl font-bold text-[#1e3828] italic leading-tight">Gran Rifa</h2>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-2">
+                            <div class="bg-[#5a7c64] text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-sm">
+                                Tu número puede ser el ganador
+                            </div>
+                            <div class="flex items-center gap-1.5 text-[#3d5a44] text-xs font-bold">
+                                <span>📅 SORTEO:</span>
+                                <span id="ticketFechaTexto" class="underline">30 de Octubre</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-col md:flex-row gap-3 justify-center mt-6">
+                <button onclick="descargarTicketImagen()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition">📥 Descargar Imagen</button>
+                <button onclick="cerrarModalTicket()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-2.5 rounded-xl text-sm transition">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ⚠️ REEMPLAZA CON TU URL REAL DE GOOGLE APPS SCRIPT
-        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        const URL_API = 'PEGA_AQUÍ_TU_URL_DE_GOOGLE_APPS_SCRIPT';
         
         let registros = [];
         let p1 = 10;
         let p2 = 15;
+        let tituloGlobal = "Gran Rifa Pro-Fondos";
+        let fechaGlobal = "Por definir";
 
         const form = document.getElementById('rifaForm');
         const configForm = document.getElementById('configForm');
@@ -175,17 +243,20 @@
                 registros = res.boletos || [];
                 
                 if (res.config) {
-                    inputTitulo.value = res.config.titulo;
-                    inputFecha.value = res.config.fecha;
+                    tituloGlobal = res.config.titulo || "Gran Rifa Pro-Fondos";
+                    fechaGlobal = res.config.fecha || "Por definir";
+                    
+                    inputTitulo.value = tituloGlobal;
+                    inputFecha.value = fechaGlobal;
                     inputPrecio1.value = res.config.precio1 || "10";
                     inputPrecio2.value = res.config.precio2 || "15";
 
                     p1 = parseFloat(res.config.precio1) || 10;
                     p2 = parseFloat(res.config.precio2) || 15;
 
-                    tituloRifa.innerText = `🎟️ ${res.config.titulo}`;
+                    tituloRifa.innerText = `🎟️ ${tituloGlobal}`;
                     subtituloOferta.innerText = `Oferta activa: 1 boleto por S/ ${p1} o 2 por S/ ${p2}`;
-                    fechaSorteoTexto.innerText = res.config.fecha;
+                    fechaSorteoTexto.innerText = fechaGlobal;
                 }
 
                 renderizar();
@@ -229,11 +300,16 @@
             btnGuardar.innerText = 'Guardando...';
             btnGuardar.disabled = true;
 
+            const numVal = document.getElementById('numero').value;
+            const nomVal = document.getElementById('nombre').value;
+            const telVal = document.getElementById('telefono').value || '---';
+            const estVal = document.getElementById('estado').value;
+
             const datosNuevos = {
-                numero: document.getElementById('numero').value,
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value || '---',
-                estado: document.getElementById('estado').value
+                numero: numVal,
+                nombre: nomVal,
+                telefono: telVal,
+                estado: estVal
             };
 
             try {
@@ -247,6 +323,9 @@
                 cancelarEdicion();
                 form.reset();
                 setTimeout(cargarDatos, 1500);
+
+                // Auto-abrir el ticket recién registrado
+                abrirTicket(numVal, nomVal);
             } catch (error) {
                 alert('Hubo un error al guardar.');
             } finally {
@@ -254,6 +333,30 @@
                 btnGuardar.disabled = false;
             }
         });
+
+        // FUNCIONES DE TICKET
+        window.abrirTicket = function(num, nom) {
+            document.getElementById('ticketNumero').innerText = num;
+            document.getElementById('ticketNombre').innerText = nom;
+            document.getElementById('ticketTituloTexto').innerText = tituloGlobal;
+            document.getElementById('ticketFechaTexto').innerText = fechaGlobal;
+            
+            document.getElementById('modalTicket').classList.remove('hidden');
+        }
+
+        window.cerrarModalTicket = function() {
+            document.getElementById('modalTicket').classList.add('hidden');
+        }
+
+        window.descargarTicketImagen = function() {
+            const ticketElement = document.getElementById('ticketVisual');
+            html2canvas(ticketElement, { scale: 3 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Ticket_Rifa_${document.getElementById('ticketNumero').innerText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
 
         window.eliminarBoleto = async function(num) {
             if (!confirm(`¿Estás seguro de eliminar el boleto #${num}?`)) return;
@@ -336,7 +439,7 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
                 tr.innerHTML = `
-                    <td class="p-4 font-extrabold text-indigo-600">#${num}</td>
+                    <td class="p-4 font-extrabold text-emerald-600">#${num}</td>
                     <td class="p-4 font-medium text-slate-700">${nom}</td>
                     <td class="p-4 text-slate-500">${tel}</td>
                     <td class="p-4">
@@ -345,6 +448,7 @@
                         </span>
                     </td>
                     <td class="p-4 text-center space-x-1">
+                        <button onclick="abrirTicket('${num}', '${nom}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">🎟️ Ver Ticket</button>
                         <button onclick="editarBoleto('${num}', '${nom}', '${tel}', '${est}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">Editar</button>
                         <button onclick="eliminarBoleto('${num}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">Eliminar</button>
                     </td>
