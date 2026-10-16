@@ -253,13 +253,27 @@
     document.body.classList.remove('modal-open');
   };
 
-  window.enviarPorWhatsApp = function() {
-    let tel = currentTicketData.tel.replace(/\D/g, '');
-    if (tel.length === 9) tel = '51' + tel;
-    if (!tel || tel.length < 8) { alert('Ingresa un número celular válido para abrir WhatsApp.'); return; }
-    const mensaje = `Hola *${currentTicketData.nom}* 🌿\n\n¡Gracias por participar en la *${tituloGlobal}*!\n\n*Tu boleto:* #${currentTicketData.num}\n*Fecha del sorteo:* ${fechaGlobal}\n\nTe comparto tu ticket. ¡Mucha suerte y gracias por tu apoyo!`;
-    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener');
-  };
+ 
+window.enviarPorWhatsApp = function() {
+  let tel = String(currentTicketData.tel || '').replace(/\D/g, '');
+
+  if (tel.length === 9) tel = '51' + tel;
+
+  if (tel.length < 10) {
+    alert('Ingresa un número de celular válido para abrir WhatsApp.');
+    return;
+  }
+
+  const nombre = currentTicketData.nom.trim().split(/\s+/)[0];
+  const mensaje =
+    `Hola, ${nombre}. Tu participación en ${tituloGlobal} ha sido registrada.\n` +
+    `Ticket: ${currentTicketData.num}\n` +
+    `Sorteo: ${fechaGlobal}.\n` +
+    `Adjunto tu ticket. Gracias por participar.`;
+
+  const url = `https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank', 'noopener');
+};
 
   window.descargarTicketImagen = async function() {
     const ticket = $('ticketVisual');
