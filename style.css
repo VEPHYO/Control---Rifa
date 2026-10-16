@@ -166,3 +166,221 @@ body.modal-open { overflow: hidden; }
   .ticket-actions { flex-direction: column; }
   .ticket-actions .btn { width: 100%; }
 }
+
+/* ===== TICKET PROFESIONAL DE RIFA ===== */
+#ticketVisual.raffle-ticket {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  isolation: isolate;
+  color: #253b30;
+  background: #fffdf7;
+  border: 1px solid #d8d0bc;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(37, 59, 48, 0.12);
+  font-family: 'DM Sans', sans-serif;
+}
+
+#ticketVisual .ticket-botanical {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.23;
+  pointer-events: none;
+}
+
+#ticketVisual .ticket-botanical svg {
+  width: 100%;
+  height: 100%;
+}
+
+#ticketVisual .ticket-left {
+  position: relative;
+  display: flex;
+  flex: 0 0 36%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 20px;
+  text-align: center;
+  background: #e9eee4;
+  border-right: 2px dashed #a8b39d;
+}
+
+#ticketVisual .ticket-left::before,
+#ticketVisual .ticket-left::after {
+  content: "";
+  position: absolute;
+  right: -11px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #d8d0bc;
+  border-radius: 50%;
+  background: #fffdf7;
+}
+
+#ticketVisual .ticket-left::before {
+  top: -11px;
+}
+
+#ticketVisual .ticket-left::after {
+  bottom: -11px;
+}
+
+#ticketVisual .ticket-number-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 16px 24px;
+  border: 1px solid #c7b78d;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 0 4px 12px rgba(37, 59, 48, 0.06);
+}
+
+#ticketVisual .ticket-number-pill span {
+  color: #71806b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+#ticketVisual .ticket-number-pill strong {
+  color: #344d3c;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+#ticketVisual .ticket-luck {
+  margin: 0;
+  color: #66765e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#ticketVisual .ticket-luck span {
+  color: #a68c53;
+}
+
+#ticketVisual .ticket-name-box {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 7px;
+  text-align: left;
+}
+
+#ticketVisual .ticket-name-box span {
+  color: #71806b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+#ticketVisual .ticket-name-box strong {
+  color: #344d3c;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+#ticketVisual .ticket-name-box i {
+  display: none;
+}
+
+#ticketVisual .ticket-right {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 22px;
+  min-width: 0;
+  padding: 35px 30px;
+}
+
+#ticketVisual .ticket-right h2 {
+  margin: 0;
+  color: #344d3c;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(25px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+#ticketVisual .ticket-winner-pill {
+  padding: 9px 13px;
+  border: 1px solid #d9cba9;
+  border-radius: 5px;
+  background: #f5f0e4;
+  color: #75633d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+#ticketVisual .ticket-date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 15px;
+  border-top: 1px solid #ded9c9;
+  width: 100%;
+  color: #52644e;
+  font-size: 12px;
+}
+
+#ticketVisual .ticket-date strong {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+#ticketVisual .ticket-date em {
+  color: #344d3c;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+#ticketVisual .calendar-icon {
+  color: #a68c53;
+}
+
+@media (max-width: 480px) {
+  #ticketVisual.raffle-ticket {
+    min-height: 240px;
+    border-radius: 12px;
+  }
+
+  #ticketVisual .ticket-left {
+    flex-basis: 37%;
+    gap: 18px;
+    padding: 20px 12px;
+  }
+
+  #ticketVisual .ticket-number-pill {
+    padding: 12px 10px;
+  }
+
+  #ticketVisual .ticket-right {
+    gap: 16px;
+    padding: 24px 16px;
+  }
+
+  #ticketVisual .ticket-winner-pill {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+}
