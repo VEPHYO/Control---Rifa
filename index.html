@@ -1,549 +1,357 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Rifa VISMO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#788f68">
+  <title>Gran Rifa | Panel de control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#f4f3ed] text-[#2c3e30] font-ticket-body min-h-screen p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        
-        <!-- Encabezado -->
-        <header class="bg-white/90 backdrop-blur-md shadow-sm rounded-3xl p-6 md:p-8 mb-6 border border-[#4a6b53]/20 text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-2 h-full bg-[#4a6b53]"></div>
-            <span class="bg-[#eaf0ec] text-[#3b5542] text-xs font-bold uppercase tracking-wider px-3.5 py-1 rounded-full border border-[#4a6b53]/20">Panel Interno de Gestión</span>
-            <h1 id="tituloRifa" class="text-3xl md:text-4xl font-extrabold text-[#1c3623] mt-3 mb-1">🌿 Control de Rifa</h1>
-            <p id="subtituloOferta" class="text-[#4a6b53] font-medium text-sm md:text-base">Registra compradores para auto-generar sus tickets y enviarlos por WhatsApp</p>
-            
-            <div class="mt-4 inline-flex items-center gap-2 bg-[#f2eee3] border border-[#d9d0be] text-[#5c4f3a] px-4 py-1.5 rounded-xl text-xs font-bold">
-                📅 Sorteo: <span id="fechaSorteoTexto" class="font-bold underline">Cargando...</span>
-            </div>
-        </header>
+<body>
+  <div class="page-shell">
+    <header class="hero-panel">
+      <div class="hero-leaf hero-leaf-one">❧</div>
+      <div class="hero-leaf hero-leaf-two">❧</div>
+      <div class="eyebrow"><span class="status-dot"></span> Panel interno de gestión</div>
+      <h1 id="tituloRifa">Gran Rifa</h1>
+      <p id="subtituloOferta">Organiza tus ventas y prepara los tickets para compartir.</p>
+      <div class="date-chip"><span aria-hidden="true">▦</span> Sorteo: <strong id="fechaSorteoTexto">Cargando…</strong></div>
+    </header>
 
-        <!-- Ajustes del Evento -->
-        <details class="bg-white/80 shadow-sm rounded-2xl p-4 mb-6 border border-[#4a6b53]/20 text-sm">
-            <summary class="font-bold text-[#3b5542] cursor-pointer select-none flex items-center justify-between">
-                <span>⚙️ Ajustes del Evento y Ofertas (Visibles para los encargados)</span>
-                <span class="text-xs text-slate-400">Desplegar</span>
-            </summary>
-            <form id="configForm" class="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4 pt-3 border-t border-[#4a6b53]/10 items-end">
-                <div>
-                    <label class="block text-xs font-semibold text-[#3b5542] mb-1">Nombre Actividad</label>
-                    <input type="text" id="inputTitulo" required class="w-full border border-[#4a6b53]/30 rounded-xl p-2 text-xs focus:ring-2 focus:ring-[#4a6b53] outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-[#3b5542] mb-1">Fecha Sorteo</label>
-                    <input type="text" id="inputFecha" required class="w-full border border-[#4a6b53]/30 rounded-xl p-2 text-xs focus:ring-2 focus:ring-[#4a6b53] outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-[#3b5542] mb-1">Precio 1 Rifa (S/)</label>
-                    <input type="number" id="inputPrecio1" required min="1" class="w-full border border-[#4a6b53]/30 rounded-xl p-2 text-xs font-bold text-[#4a6b53] focus:ring-2 focus:ring-[#4a6b53] outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-[#3b5542] mb-1">Precio 2 Rifas (S/)</label>
-                    <input type="number" id="inputPrecio2" required min="1" class="w-full border border-[#4a6b53]/30 rounded-xl p-2 text-xs font-bold text-[#4a6b53] focus:ring-2 focus:ring-[#4a6b53] outline-none">
-                </div>
-                <div>
-                    <button type="submit" id="btnGuardarConfig" class="w-full bg-[#3b5542] hover:bg-[#2c3f31] text-white font-bold p-2 text-xs rounded-xl transition">Guardar Evento</button>
-                </div>
-            </form>
-        </details>
+    <details class="settings-panel">
+      <summary><span><span class="summary-icon">⚙</span> Ajustes del evento y ofertas</span><span class="summary-hint">Desplegar / ocultar</span></summary>
+      <form id="configForm" class="settings-grid">
+        <label>Nombre de la actividad<input type="text" id="inputTitulo" required></label>
+        <label>Fecha del sorteo<input type="text" id="inputFecha" required placeholder="30 de octubre"></label>
+        <label>Precio de 1 boleto (S/) <input type="number" id="inputPrecio1" min="1" step="0.5" required></label>
+        <label>Precio de 2 boletos (S/) <input type="number" id="inputPrecio2" min="1" step="0.5" required></label>
+        <button class="btn btn-primary" type="submit" id="btnGuardarConfig">Guardar ajustes</button>
+      </form>
+      <p class="settings-note">Los ajustes se guardan en este navegador y se envían a Google Sheets cuando la conexión está disponible.</p>
+    </details>
 
-        <!-- Estadísticas -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white/90 p-5 rounded-2xl shadow-sm border border-[#4a6b53]/20 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-[#6b8271] uppercase tracking-wider">Total Recaudado</p>
-                    <p id="totalRecaudado" class="text-3xl font-extrabold text-[#1c3623] mt-1">S/ 0.00</p>
-                </div>
-                <div class="p-3 bg-[#eaf0ec] rounded-xl text-[#3b5542] text-xl">💰</div>
-            </div>
-            <div class="bg-white/90 p-5 rounded-2xl shadow-sm border border-[#4a6b53]/20 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-[#6b8271] uppercase tracking-wider">Boletos Vendidos</p>
-                    <p id="totalVendidos" class="text-3xl font-extrabold text-[#3b5542] mt-1">0</p>
-                </div>
-                <div class="p-3 bg-[#eaf0ec] rounded-xl text-[#3b5542] text-xl">✅</div>
-            </div>
-            <div class="bg-white/90 p-5 rounded-2xl shadow-sm border border-[#4a6b53]/20 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold text-[#6b8271] uppercase tracking-wider">Disponibles</p>
-                    <p id="totalDisponibles" class="text-3xl font-extrabold text-[#967637] mt-1">100</p>
-                </div>
-                <div class="p-3 bg-[#fdf9ee] rounded-xl text-[#967637] text-xl">🎟️</div>
-            </div>
+    <section class="stats-grid" aria-label="Resumen de la rifa">
+      <article class="stat-card">
+        <div class="stat-copy"><span>Total recaudado</span><strong id="totalRecaudado">S/ 0.00</strong><small>Según boletos pagados</small></div>
+        <div class="stat-icon">S/</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-copy"><span>Boletos registrados</span><strong id="totalVendidos">0</strong><small>Ocupados o reservados</small></div>
+        <div class="stat-icon">✓</div>
+      </article>
+      <article class="stat-card stat-available">
+        <div class="stat-copy"><span>Disponibles</span><strong id="totalDisponibles">100</strong><small>De un total de 100</small></div>
+        <div class="stat-icon">♧</div>
+      </article>
+    </section>
+
+    <section class="panel form-panel">
+      <div class="section-heading">
+        <div><span class="section-kicker">REGISTRO</span><h2 id="formTitulo">Registrar una compra</h2></div>
+        <button type="button" id="btnCancelarEdicion" onclick="cancelarEdicion()" class="btn btn-quiet hidden">Cancelar edición</button>
+      </div>
+      <p class="helper-text">Para registrar varios boletos, separa sus números con comas. Ejemplo: <b>12, 13</b>.</p>
+      <form id="rifaForm" class="purchase-grid">
+        <label>N.º de boleto(s)<input type="text" id="numero" required placeholder="Ej. 1 o 10, 11"></label>
+        <label>Nombre del comprador<input type="text" id="nombre" required placeholder="Nombre y apellido"></label>
+        <label>Celular / WhatsApp<input type="tel" id="telefono" placeholder="Ej. 983965241"></label>
+        <label>Estado del pago<select id="estado"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></label>
+        <button type="submit" id="btnGuardar" class="btn btn-primary btn-save">Guardar y preparar ticket</button>
+      </form>
+    </section>
+
+    <section class="panel records-panel">
+      <div class="section-heading records-heading">
+        <div><span class="section-kicker">CONTROL DE VENTAS</span><h2>Listado de boletos</h2><p class="helper-text">Los datos se consultan desde tu hoja de Google Sheets.</p></div>
+        <div class="search-wrap"><span>⌕</span><input type="search" id="buscador" placeholder="Buscar nombre o número…" aria-label="Buscar comprador o número"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N.º</th><th>Comprador</th><th>WhatsApp</th><th>Pago</th><th class="actions-head">Acciones</th></tr></thead>
+          <tbody id="tablaRegistros"><tr><td colspan="5" class="empty-cell">Cargando registros…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span class="status-dot"></span> Datos sincronizados al actualizar la lista <button id="btnActualizar" class="text-button" type="button">Actualizar</button></div>
+    </section>
+    <footer>Hecho con cuidado <span>♥</span> para una rifa especial</footer>
+  </div>
+
+  <!-- Vista previa del boleto: se exporta como PNG a tamaño grande -->
+  <div id="modalTicket" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" onclick="cerrarModalTicket()"></div>
+    <div class="modal-card">
+      <button class="modal-close" type="button" onclick="cerrarModalTicket()" aria-label="Cerrar">×</button>
+      <div class="modal-heading"><span class="section-kicker">LISTO PARA COMPARTIR</span><h2 id="modalTitle">Tu ticket de la rifa</h2><p>Descarga el boleto como imagen o compártelo por WhatsApp.</p></div>
+      <div class="ticket-stage">
+        <div id="ticketVisual" class="raffle-ticket">
+          <div class="ticket-botanical" aria-hidden="true">
+            <svg viewBox="0 0 780 420" preserveAspectRatio="xMidYMid slice">
+              <g fill="none" stroke="#81947a" stroke-width="3" stroke-linecap="round" opacity=".5">
+                <path d="M80 440 C210 320 280 210 480 40"/><path d="M270 285 C390 275 470 250 590 180"/><path d="M375 180 C460 120 560 100 710 80"/>
+              </g>
+              <g fill="#b9c7b1" stroke="#84977d" stroke-width="1.5" opacity=".47">
+                <path d="M150 375 C65 320 55 245 76 205 C143 231 177 297 150 375Z"/>
+                <path d="M207 315 C125 286 113 222 127 184 C191 205 225 260 207 315Z"/>
+                <path d="M278 243 C209 199 215 140 243 108 C300 145 317 198 278 243Z"/>
+                <path d="M355 171 C302 112 326 58 360 35 C406 84 403 134 355 171Z"/>
+                <path d="M300 265 C359 192 423 194 453 218 C407 267 351 286 300 265Z"/>
+                <path d="M403 197 C454 126 519 126 548 151 C509 199 453 217 403 197Z"/>
+                <path d="M493 125 C548 67 613 79 635 107 C588 147 536 151 493 125Z"/>
+                <path d="M425 303 C489 245 553 259 572 291 C520 326 467 329 425 303Z"/>
+                <path d="M547 229 C608 178 674 193 692 225 C640 256 589 258 547 229Z"/>
+                <path d="M575 62 C603 5 665 -5 697 14 C675 65 625 83 575 62Z"/>
+                <path d="M90 427 C31 383 29 333 46 303 C95 327 119 373 90 427Z"/>
+              </g>
+              <g fill="#d7ded1" opacity=".72">
+                <circle cx="234" cy="65" r="4"/><circle cx="482" cy="70" r="3"/><circle cx="662" cy="145" r="4"/><circle cx="568" cy="352" r="3"/><circle cx="350" cy="350" r="4"/>
+              </g>
+            </svg>
+          </div>
+          <section class="ticket-left">
+            <div class="ticket-number-pill"><span>N.º:</span><strong id="ticketNumero">001</strong></div>
+            <p class="ticket-luck"><span>♥</span> ¡Mucha suerte! <span>♥</span></p>
+            <div class="ticket-name-box"><span>Nombre:</span><strong id="ticketNombre">Nombre del comprador</strong><i></i><i></i></div>
+          </section>
+          <section class="ticket-right">
+            <h2 id="ticketTituloTexto">Gran Rifa</h2>
+            <div class="ticket-winner-pill">Tu número puede ser el ganador</div>
+            <div class="ticket-date"><span class="calendar-icon">▦</span><strong>SORTEO:</strong><em id="ticketFechaTexto">30 de Octubre</em></div>
+          </section>
         </div>
-
-        <!-- Formulario -->
-        <div class="bg-white shadow-md rounded-3xl p-6 md:p-8 mb-6 border border-[#4a6b53]/20">
-            <div class="flex justify-between items-center mb-2">
-                <h2 id="formTitulo" class="text-xl font-bold text-[#1c3623]">Registrar Compra</h2>
-                <button type="button" id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-red-600 font-bold hover:underline">Cancelar edición</button>
-            </div>
-            <p class="text-xs text-[#5c7a62] mb-4">💡 Para compras múltiples, escribe los números separados por coma (ej: <span class="font-bold">12, 13</span>).</p>
-            
-            <form id="rifaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-[#3b5542] mb-1">N° de Boleto(s)</label>
-                    <input type="text" id="numero" required class="w-full border border-[#4a6b53]/30 rounded-xl p-3 focus:ring-2 focus:ring-[#4a6b53] outline-none font-bold text-[#1c3623] bg-[#fcfbf9]" placeholder="Ej. 1 o 10, 11">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#3b5542] mb-1">Comprador</label>
-                    <input type="text" id="nombre" required class="w-full border border-[#4a6b53]/30 rounded-xl p-3 focus:ring-2 focus:ring-[#4a6b53] outline-none bg-[#fcfbf9]" placeholder="Nombre y Apellido">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#3b5542] mb-1">Celular WhatsApp</label>
-                    <input type="text" id="telefono" class="w-full border border-[#4a6b53]/30 rounded-xl p-3 focus:ring-2 focus:ring-[#4a6b53] outline-none bg-[#fcfbf9]" placeholder="Ej. 983965241">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-[#3b5542] mb-1">Estado Pago</label>
-                    <select id="estado" class="w-full border border-[#4a6b53]/30 rounded-xl p-3 focus:ring-2 focus:ring-[#4a6b53] outline-none bg-[#fcfbf9] font-semibold">
-                        <option value="Pagado">Pagado</option>
-                        <option value="Pendiente">Pendiente</option>
-                    </select>
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" id="btnGuardar" class="w-full bg-[#4a6b53] hover:bg-[#38523f] text-white font-bold p-3 rounded-xl shadow-md transition transform active:scale-95">Guardar y Enviar</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Tabla -->
-        <div class="bg-white shadow-md rounded-3xl p-6 md:p-8 border border-[#4a6b53]/20">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-[#1c3623]">Listado de Boletos</h2>
-                    <p class="text-xs text-[#6b8271]">Sincronizado en tiempo real</p>
-                </div>
-                <div class="relative w-full md:w-80">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-[#6b8271]">🔍</span>
-                    <input type="text" id="buscador" placeholder="Buscar comprador o número..." class="w-full border border-[#4a6b53]/30 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4a6b53] outline-none bg-[#fcfbf9]">
-                </div>
-            </div>
-
-            <div class="overflow-x-auto rounded-2xl border border-[#4a6b53]/10">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-[#f6f5ef] border-b border-[#4a6b53]/10 text-[#3b5542] text-xs uppercase tracking-wider">
-                            <th class="p-4 font-bold">N°</th>
-                            <th class="p-4 font-bold">Comprador</th>
-                            <th class="p-4 font-bold">WhatsApp</th>
-                            <th class="p-4 font-bold">Estado</th>
-                            <th class="p-4 font-bold text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaRegistros" class="divide-y divide-[#4a6b53]/10 text-sm">
-                        <tr><td colspan="5" class="p-8 text-center text-slate-400">Cargando registros...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+      </div>
+      <div class="ticket-actions">
+        <button type="button" onclick="descargarTicketImagen()" class="btn btn-primary">↓ Descargar ticket PNG</button>
+        <button type="button" onclick="enviarPorWhatsApp()" class="btn btn-whatsapp">↗ Abrir WhatsApp</button>
+        <button type="button" onclick="cerrarModalTicket()" class="btn btn-quiet">Cerrar</button>
+      </div>
+      <p class="modal-note">La imagen descargada incluye el diseño completo del boleto.</p>
     </div>
+  </div>
 
-    <!-- MODAL TICKET BOTÁNICO MEJORADO -->
-    <div id="modalTicket" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl text-center">
-            <h3 class="text-xl font-bold text-[#1c3623] mb-1">🎟️ Ticket Generado</h3>
-            <p class="text-xs text-slate-500 mb-4">Descarga la imagen del ticket o abre WhatsApp con el cliente</p>
-            
-            <!-- TICKET BOTÁNICO VERDE MEJORADO -->
-            <div class="flex justify-center my-4 overflow-x-auto">
-                <div id="ticketVisual" class="relative w-[620px] h-[230px] ticket-container rounded-3xl border-2 border-[#5c7a62]/40 shadow-xl flex items-center overflow-hidden font-ticket-body select-none">
-                    
-                    <!-- Follaje Vectorial Elegante -->
-                    <svg class="absolute right-0 top-0 h-full w-[70%] opacity-40 pointer-events-none" viewBox="0 0 400 230" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 180 240 C 240 170, 270 110, 390 30" stroke="#3b5842" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M 270 130 C 250 100, 200 110, 220 140 C 240 160, 280 150, 270 130 Z" fill="#5c7a62"/>
-                        <path d="M 310 90 C 340 60, 370 90, 340 105 C 310 115, 290 100, 310 90 Z" fill="#4d6c54"/>
-                        <path d="M 230 170 C 190 150, 200 190, 225 195 C 240 195, 250 180, 230 170 Z" fill="#6d8e74"/>
-                        <path d="M 340 50 C 370 20, 400 50, 375 65 Z" fill="#3b5842"/>
-                    </svg>
+<script>
+  // Mantén aquí la URL de tu Google Apps Script original.
+  const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
+  let registros = [];
+  let p1 = 10, p2 = 15;
+  let tituloGlobal = 'Gran Rifa', fechaGlobal = '30 de Octubre';
+  let currentTicketData = { num: '', nom: '', tel: '' };
+  let numeroEditando = null;
 
-                    <!-- Lado Izquierdo (Muesca) -->
-                    <div class="w-[42%] h-full p-4 flex flex-col justify-between relative bg-white/85 backdrop-blur-sm border-r-2 border-dashed border-[#5c7a62]/60">
-                        <div>
-                            <div class="inline-flex items-center ticket-pill-number text-white px-4 py-1.5 rounded-full shadow-md gap-2">
-                                <span class="text-sm font-bold tracking-wider">N°:</span>
-                                <span id="ticketNumero" class="text-xl font-extrabold">1</span>
-                            </div>
-                            <p class="text-xs font-semibold ticket-pill-mucha-suerte mt-2 flex items-center gap-1">
-                                💚 <i>¡Mucha suerte!</i> 💚
-                            </p>
-                        </div>
+  const $ = id => document.getElementById(id);
+  const form = $('rifaForm'), configForm = $('configForm'), tabla = $('tablaRegistros');
+  const buscador = $('buscador'), btnGuardar = $('btnGuardar'), btnGuardarConfig = $('btnGuardarConfig');
 
-                        <div class="bg-[#f3f1e7] p-2.5 rounded-xl border border-[#5c7a62]/30 text-left">
-                            <span class="text-[11px] font-bold text-[#324a38] block">Nombre:</span>
-                            <span id="ticketNombre" class="text-xs font-bold text-slate-800 truncate block mt-0.5 border-b border-[#5c7a62]/50 pb-0.5">Scarlet</span>
-                        </div>
-                    </div>
+  function aplicarConfigUI() {
+    $('inputTitulo').value = tituloGlobal;
+    $('inputFecha').value = fechaGlobal;
+    $('inputPrecio1').value = p1;
+    $('inputPrecio2').value = p2;
+    $('tituloRifa').textContent = tituloGlobal;
+    $('subtituloOferta').textContent = `Una oportunidad para ganar · 1 boleto S/ ${p1} · 2 boletos S/ ${p2}`;
+    $('fechaSorteoTexto').textContent = fechaGlobal;
+  }
 
-                    <!-- Lado Derecho (Cuerpo Principal) -->
-                    <div class="w-[58%] h-full p-5 flex flex-col justify-between relative text-right z-10">
-                        <div class="text-right">
-                            <h2 id="ticketTituloTexto" class="font-ticket-script text-5xl font-bold ticket-title-green leading-tight">Gran Rifa</h2>
-                        </div>
+  function cargarMemoriaLocal() {
+    tituloGlobal = localStorage.getItem('rifa_titulo') || tituloGlobal;
+    fechaGlobal = localStorage.getItem('rifa_fecha') || fechaGlobal;
+    p1 = Number(localStorage.getItem('rifa_p1')) || p1;
+    p2 = Number(localStorage.getItem('rifa_p2')) || p2;
+    aplicarConfigUI();
+  }
 
-                        <div class="flex flex-col items-end gap-2">
-                            <div class="ticket-pill-ganador text-xs font-semibold px-4 py-1.5 rounded-full text-center">
-                                Tu número puede ser el ganador
-                            </div>
-                            <div class="flex items-center gap-1.5 text-[#2c4733] text-xs font-bold bg-white/80 backdrop-blur-sm px-3 py-1 rounded-lg border border-[#5c7a62]/30">
-                                🗓️ <span>SORTEO:</span>
-                                <span id="ticketFechaTexto" class="underline">30 de Octubre</span>
-                            </div>
-                        </div>
-                    </div>
+  async function cargarDatos() {
+    try {
+      const respuesta = await fetch(URL_API, { cache: 'no-store' });
+      if (!respuesta.ok) throw new Error('No se pudo consultar Google Sheets');
+      const res = await respuesta.json();
+      registros = Array.isArray(res.boletos) ? res.boletos : [];
+      if (res.config && res.config.titulo) {
+        tituloGlobal = res.config.titulo;
+        fechaGlobal = res.config.fecha || fechaGlobal;
+        p1 = Number(res.config.precio1) || p1;
+        p2 = Number(res.config.precio2) || p2;
+        localStorage.setItem('rifa_titulo', tituloGlobal);
+        localStorage.setItem('rifa_fecha', fechaGlobal);
+        localStorage.setItem('rifa_p1', p1);
+        localStorage.setItem('rifa_p2', p2);
+      }
+      aplicarConfigUI();
+      renderizar(buscador.value);
+    } catch (err) {
+      renderizar(buscador.value);
+      console.warn('No se pudo actualizar desde Google Sheets:', err);
+    }
+  }
 
-                </div>
-            </div>
+  configForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    btnGuardarConfig.disabled = true;
+    btnGuardarConfig.textContent = 'Guardando…';
+    tituloGlobal = $('inputTitulo').value.trim();
+    fechaGlobal = $('inputFecha').value.trim();
+    p1 = Number($('inputPrecio1').value) || 10;
+    p2 = Number($('inputPrecio2').value) || 15;
+    localStorage.setItem('rifa_titulo', tituloGlobal);
+    localStorage.setItem('rifa_fecha', fechaGlobal);
+    localStorage.setItem('rifa_p1', p1);
+    localStorage.setItem('rifa_p2', p2);
+    aplicarConfigUI();
+    const payload = { action: 'updateConfig', titulo: tituloGlobal, fecha: fechaGlobal, precio1: p1, precio2: p2 };
+    try {
+      await fetch(URL_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      alert('Solicitud de guardado enviada. Si Google Apps Script está disponible, los ajustes se sincronizarán.');
+    } catch (err) {
+      alert('Los ajustes se guardaron en este navegador, pero no se pudo contactar con Google Sheets.');
+    } finally {
+      btnGuardarConfig.disabled = false;
+      btnGuardarConfig.textContent = 'Guardar ajustes';
+      renderizar(buscador.value);
+    }
+  });
 
-            <!-- Botones de Acción -->
-            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <button onclick="enviarPorWhatsApp()" class="bg-[#25D366] hover:bg-[#1eb755] text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2">
-                    💬 Abrir WhatsApp con Cliente
-                </button>
-                <button onclick="descargarTicketImagen()" class="bg-[#3b5542] hover:bg-[#2c3f31] text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition">
-                    📥 Descargar Imagen
-                </button>
-                <button onclick="cerrarModalTicket()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-sm transition">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const numVal = $('numero').value.trim();
+    const nomVal = $('nombre').value.trim();
+    const telVal = $('telefono').value.trim() || '---';
+    const estVal = $('estado').value;
+    if (!numVal || !nomVal) return;
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = numeroEditando === null ? 'Guardando…' : 'Actualizando…';
+    const payload = { numero: numVal, nombre: nomVal, telefono: telVal, estado: estVal };
+    // El endpoint existente recibe la misma estructura que el proyecto original.
+    try {
+      await fetch(URL_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      cancelarEdicion();
+      form.reset();
+      abrirTicket(numVal, nomVal, telVal);
+      setTimeout(cargarDatos, 1300);
+    } catch (err) {
+      alert('No se pudo contactar con Google Sheets. Revisa tu conexión.');
+    } finally {
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = 'Guardar y preparar ticket';
+    }
+  });
 
-    <script>
-        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        const URL_API = 'https://script.google.com/macros/s/AKfycbxzeWk33PQ_IUJqCrYC_qT4iJ5s7h5TKaGzJ7X-CNyad711gTo9xWETDXK5cRoyql1_Mg/exec';
-        
-        let registros = [];
-        let p1 = 10;
-        let p2 = 15;
-        let tituloGlobal = "Gran Rifa";
-        let fechaGlobal = "30 de Octubre";
+  window.abrirTicket = function(num, nom, tel = '---') {
+    currentTicketData = { num: String(num), nom: String(nom), tel: String(tel) };
+    $('ticketNumero').textContent = currentTicketData.num;
+    $('ticketNombre').textContent = currentTicketData.nom;
+    $('ticketTituloTexto').textContent = tituloGlobal;
+    $('ticketFechaTexto').textContent = fechaGlobal;
+    $('modalTicket').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+  };
+  window.cerrarModalTicket = function() {
+    $('modalTicket').classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  };
 
-        let currentTicketData = { num: '', nom: '', tel: '' };
+  window.enviarPorWhatsApp = function() {
+    let tel = currentTicketData.tel.replace(/\D/g, '');
+    if (tel.length === 9) tel = '51' + tel;
+    if (!tel || tel.length < 8) { alert('Ingresa un número celular válido para abrir WhatsApp.'); return; }
+    const mensaje = `Hola *${currentTicketData.nom}* 🌿\n\n¡Gracias por participar en la *${tituloGlobal}*!\n\n*Tu boleto:* #${currentTicketData.num}\n*Fecha del sorteo:* ${fechaGlobal}\n\nTe comparto tu ticket. ¡Mucha suerte y gracias por tu apoyo!`;
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener');
+  };
 
-        const form = document.getElementById('rifaForm');
-        const configForm = document.getElementById('configForm');
-        const tabla = document.getElementById('tablaRegistros');
-        const buscador = document.getElementById('buscador');
-        const btnGuardar = document.getElementById('btnGuardar');
-        const btnGuardarConfig = document.getElementById('btnGuardarConfig');
-        
-        const inputTitulo = document.getElementById('inputTitulo');
-        const inputFecha = document.getElementById('inputFecha');
-        const inputPrecio1 = document.getElementById('inputPrecio1');
-        const inputPrecio2 = document.getElementById('inputPrecio2');
-        const tituloRifa = document.getElementById('tituloRifa');
-        const subtituloOferta = document.getElementById('subtituloOferta');
-        const fechaSorteoTexto = document.getElementById('fechaSorteoTexto');
-        const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
-        const formTitulo = document.getElementById('formTitulo');
+  window.descargarTicketImagen = async function() {
+    const ticket = $('ticketVisual');
+    if (typeof html2canvas !== 'function') { alert('No se pudo cargar el generador de imágenes. Revisa tu conexión e inténtalo otra vez.'); return; }
+    try {
+      const canvas = await html2canvas(ticket, { scale: 2, useCORS: true, backgroundColor: '#fffdf9', logging: false });
+      const link = document.createElement('a');
+      link.download = `Ticket_Rifa_${currentTicketData.num.replace(/[^\w-]/g, '_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      alert('No se pudo generar la imagen. Comprueba que las fuentes hayan terminado de cargar e inténtalo de nuevo.');
+      console.error(err);
+    }
+  };
 
-        // Cargar ajustes desde memoria local primero (Respaldo persistente)
-        function cargarMemoriaLocal() {
-            if (localStorage.getItem('rifa_titulo')) tituloGlobal = localStorage.getItem('rifa_titulo');
-            if (localStorage.getItem('rifa_fecha')) fechaGlobal = localStorage.getItem('rifa_fecha');
-            if (localStorage.getItem('rifa_p1')) p1 = parseFloat(localStorage.getItem('rifa_p1'));
-            if (localStorage.getItem('rifa_p2')) p2 = parseFloat(localStorage.getItem('rifa_p2'));
+  window.eliminarBoleto = async function(num) {
+    if (!confirm(`¿Seguro que deseas eliminar el boleto #${num}? Esta acción afectará el registro de Google Sheets.`)) return;
+    try {
+      await fetch(URL_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'delete', numero: num }) });
+      setTimeout(cargarDatos, 1200);
+    } catch (err) { alert('No se pudo enviar la solicitud de eliminación.'); }
+  };
 
-            inputTitulo.value = tituloGlobal;
-            inputFecha.value = fechaGlobal;
-            inputPrecio1.value = p1;
-            inputPrecio2.value = p2;
+  window.editarBoleto = function(num, nom, tel, est) {
+    numeroEditando = String(num);
+    $('numero').value = num;
+    $('nombre').value = nom;
+    $('telefono').value = tel === '---' ? '' : tel;
+    $('estado').value = est;
+    $('formTitulo').textContent = `Editando boleto #${num}`;
+    btnGuardar.textContent = 'Actualizar registro';
+    $('btnCancelarEdicion').classList.remove('hidden');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  window.cancelarEdicion = function() {
+    numeroEditando = null;
+    form.reset();
+    $('formTitulo').textContent = 'Registrar una compra';
+    btnGuardar.textContent = 'Guardar y preparar ticket';
+    $('btnCancelarEdicion').classList.add('hidden');
+  };
 
-            tituloRifa.innerText = `🌿 ${tituloGlobal}`;
-            subtituloOferta.innerText = `Oferta activa: 1 boleto x S/ ${p1} o 2 x S/ ${p2}`;
-            fechaSorteoTexto.innerText = fechaGlobal;
-        }
+  function totalNumeros(registro) {
+    return String(registro.numero || '').split(',').map(x => x.trim()).filter(Boolean).length;
+  }
+  function calcularTotalRecaudado(pagados) {
+    const total = pagados.reduce((sum, r) => sum + totalNumeros(r), 0);
+    return Math.floor(total / 2) * p2 + (total % 2) * p1;
+  }
+  function escapar(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
 
-        async function cargarDatos() {
-            cargarMemoriaLocal();
+  function renderizar(filtro = '') {
+    tabla.innerHTML = '';
+    const query = filtro.toLowerCase().trim();
+    const filtrados = registros.filter(r => String(r.nombre || '').toLowerCase().includes(query) || String(r.numero || '').toLowerCase().includes(query) || String(r.telefono || '').toLowerCase().includes(query));
+    if (!filtrados.length) {
+      tabla.innerHTML = `<tr><td colspan="5" class="empty-cell">${registros.length ? 'No hay resultados para tu búsqueda.' : 'Aún no hay registros o no se pudo conectar con la hoja.'}</td></tr>`;
+    } else {
+      filtrados.forEach(r => {
+        const num = String(r.numero || '---'), nom = String(r.nombre || '---'), tel = String(r.telefono || '---'), est = String(r.estado || 'Pendiente');
+        const tr = document.createElement('tr');
+        const badgeClass = est === 'Pagado' ? 'paid' : 'pending';
+        tr.innerHTML = `
+          <td><span class="number-cell">#${escapar(num)}</span></td>
+          <td><strong class="buyer-name">${escapar(nom)}</strong></td>
+          <td class="muted-cell">${escapar(tel)}</td>
+          <td><span class="payment-badge ${badgeClass}">${escapar(est)}</span></td>
+          <td><div class="row-actions">
+            <button class="mini-btn ticket-btn" data-action="ticket">Ticket</button>
+            <button class="mini-btn edit-btn" data-action="edit">Editar</button>
+            <button class="mini-btn delete-btn" data-action="delete">Eliminar</button>
+          </div></td>`;
+        tr.querySelector('[data-action="ticket"]').addEventListener('click', () => abrirTicket(num, nom, tel));
+        tr.querySelector('[data-action="edit"]').addEventListener('click', () => editarBoleto(num, nom, tel, est));
+        tr.querySelector('[data-action="delete"]').addEventListener('click', () => eliminarBoleto(num));
+        tabla.appendChild(tr);
+      });
+    }
+    const pagados = registros.filter(r => String(r.estado || '').toLowerCase() === 'pagado');
+    const vendidos = registros.reduce((sum, r) => sum + totalNumeros(r), 0);
+    $('totalRecaudado').textContent = `S/ ${calcularTotalRecaudado(pagados).toFixed(2)}`;
+    $('totalVendidos').textContent = vendidos;
+    $('totalDisponibles').textContent = Math.max(0, 100 - vendidos);
+  }
 
-            try {
-                let respuesta = await fetch(URL_API);
-                let res = await respuesta.json();
-                
-                registros = res.boletos || [];
-                
-                if (res.config && res.config.titulo) {
-                    tituloGlobal = res.config.titulo;
-                    fechaGlobal = res.config.fecha;
-                    p1 = parseFloat(res.config.precio1) || 10;
-                    p2 = parseFloat(res.config.precio2) || 15;
-
-                    // Guardar copia local
-                    localStorage.setItem('rifa_titulo', tituloGlobal);
-                    localStorage.setItem('rifa_fecha', fechaGlobal);
-                    localStorage.setItem('rifa_p1', p1);
-                    localStorage.setItem('rifa_p2', p2);
-
-                    inputTitulo.value = tituloGlobal;
-                    inputFecha.value = fechaGlobal;
-                    inputPrecio1.value = p1;
-                    inputPrecio2.value = p2;
-
-                    tituloRifa.innerText = `🌿 ${tituloGlobal}`;
-                    subtituloOferta.innerText = `Oferta activa: 1 boleto x S/ ${p1} o 2 x S/ ${p2}`;
-                    fechaSorteoTexto.innerText = fechaGlobal;
-                }
-
-                renderizar();
-            } catch (error) {
-                renderizar();
-            }
-        }
-
-        // Guardar configuración persistente
-        configForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            btnGuardarConfig.innerText = 'Guardando...';
-            btnGuardarConfig.disabled = true;
-
-            tituloGlobal = inputTitulo.value;
-            fechaGlobal = inputFecha.value;
-            p1 = parseFloat(inputPrecio1.value) || 10;
-            p2 = parseFloat(inputPrecio2.value) || 15;
-
-            // Guardado inmediato en memoria local
-            localStorage.setItem('rifa_titulo', tituloGlobal);
-            localStorage.setItem('rifa_fecha', fechaGlobal);
-            localStorage.setItem('rifa_p1', p1);
-            localStorage.setItem('rifa_p2', p2);
-
-            tituloRifa.innerText = `🌿 ${tituloGlobal}`;
-            subtituloOferta.innerText = `Oferta activa: 1 boleto x S/ ${p1} o 2 x S/ ${p2}`;
-            fechaSorteoTexto.innerText = fechaGlobal;
-
-            const configNuevas = {
-                action: 'updateConfig',
-                titulo: tituloGlobal,
-                fecha: fechaGlobal,
-                precio1: p1,
-                precio2: p2
-            };
-
-            try {
-                await fetch(URL_API, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(configNuevas)
-                });
-                
-                alert('¡Ajustes del evento guardados correctamente!');
-            } catch (error) {
-                alert('Ajustes guardados localmente.');
-            } finally {
-                btnGuardarConfig.innerText = 'Guardar Evento';
-                btnGuardarConfig.disabled = false;
-                renderizar();
-            }
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            btnGuardar.innerText = 'Guardando...';
-            btnGuardar.disabled = true;
-
-            const numVal = document.getElementById('numero').value;
-            const nomVal = document.getElementById('nombre').value;
-            const telVal = document.getElementById('telefono').value || '---';
-            const estVal = document.getElementById('estado').value;
-
-            const datosNuevos = {
-                numero: numVal,
-                nombre: nomVal,
-                telefono: telVal,
-                estado: estVal
-            };
-
-            try {
-                await fetch(URL_API, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datosNuevos)
-                });
-
-                cancelarEdicion();
-                form.reset();
-                setTimeout(cargarDatos, 1200);
-
-                abrirTicket(numVal, nomVal, telVal);
-            } catch (error) {
-                alert('Error al conectar con la base de datos.');
-            } finally {
-                btnGuardar.innerText = 'Guardar y Enviar';
-                btnGuardar.disabled = false;
-            }
-        });
-
-        window.abrirTicket = function(num, nom, tel = '---') {
-            currentTicketData = { num, nom, tel };
-
-            document.getElementById('ticketNumero').innerText = num;
-            document.getElementById('ticketNombre').innerText = nom;
-            document.getElementById('ticketTituloTexto').innerText = tituloGlobal;
-            document.getElementById('ticketFechaTexto').innerText = fechaGlobal;
-            
-            document.getElementById('modalTicket').classList.remove('hidden');
-        }
-
-        window.cerrarModalTicket = function() {
-            document.getElementById('modalTicket').classList.add('hidden');
-        }
-
-        window.enviarPorWhatsApp = function() {
-            let telLimpio = currentTicketData.tel.replace(/[^0-9]/g, '');
-            
-            if(telLimpio.length === 9) {
-                telLimpio = '51' + telLimpio; 
-            }
-
-            if(!telLimpio || telLimpio.length < 8) {
-                alert('Ingresa un número celular válido.');
-                return;
-            }
-
-            const mensaje = `Hola *${currentTicketData.nom}* +
-                            `¡Confirmación de participación en la *${tituloGlobal}*! +
-                            `*Detalles de tu boleto:*\n` +
-                            `*N° de Boleto:* #${currentTicketData.num}\n` +
-                            `*Fecha del Sorteo:* ${fechaGlobal}\n\n` +
-                            `¡Muchas gracias por tu apoyo y mucha suerte!`;
-
-            const urlWS = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
-            window.open(urlWS, '_blank');
-        }
-
-        window.descargarTicketImagen = function() {
-            const ticketElement = document.getElementById('ticketVisual');
-            html2canvas(ticketElement, { scale: 3, useCORS: true }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Ticket_Rifa_${document.getElementById('ticketNumero').innerText}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-
-        window.eliminarBoleto = async function(num) {
-            if (!confirm(`¿Estás seguro de eliminar el boleto #${num}?`)) return;
-
-            try {
-                await fetch(URL_API, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', numero: num })
-                });
-
-                setTimeout(cargarDatos, 1200);
-            } catch (error) {
-                alert('Error al eliminar.');
-            }
-        }
-
-        window.editarBoleto = function(num, nom, tel, est) {
-            document.getElementById('numero').value = num;
-            document.getElementById('nombre').value = nom;
-            document.getElementById('telefono').value = tel === '---' ? '' : tel;
-            document.getElementById('estado').value = est;
-            
-            formTitulo.innerText = `✏️ Editando Boleto #${num}`;
-            btnGuardar.innerText = 'Actualizar Registro';
-            btnCancelarEdicion.classList.remove('hidden');
-            window.scrollTo({ top: 300, behavior: 'smooth' });
-        }
-
-        window.cancelarEdicion = function() {
-            form.reset();
-            formTitulo.innerText = 'Registrar Compra';
-            btnGuardar.innerText = 'Guardar y Enviar';
-            btnCancelarEdicion.classList.add('hidden');
-        }
-
-        buscador.addEventListener('input', (e) => {
-            renderizar(e.target.value);
-        });
-
-        function calcularTotalRecaudado(boletosPagados) {
-            let totalBoletos = 0;
-            boletosPagados.forEach(r => {
-                const nums = String(r.numero || '').split(',');
-                totalBoletos += nums.length;
-            });
-
-            const pares = Math.floor(totalBoletos / 2);
-            const sueltos = totalBoletos % 2;
-            
-            return (pares * p2) + (sueltos * p1);
-        }
-
-        function renderizar(filtro = '') {
-            tabla.innerHTML = '';
-            let pagadosList = [];
-
-            const filtrados = registros.filter(r => {
-                const nombreVal = String(r.nombre || '').toLowerCase();
-                const numVal = String(r.numero || '');
-                return nombreVal.includes(filtro.toLowerCase()) || numVal.includes(filtro);
-            });
-
-            if(filtrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No se encontraron registros</td></tr>`;
-                return;
-            }
-
-            filtrados.forEach(r => {
-                const num = r.numero || '---';
-                const nom = r.nombre || '---';
-                const tel = r.telefono || '---';
-                const est = r.estado || 'Pendiente';
-
-                if(est === 'Pagado') {
-                    pagadosList.push(r);
-                }
-                
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-[#f6f5ef] transition";
-                tr.innerHTML = `
-                    <td class="p-4 font-extrabold text-[#4a6b53]">#${num}</td>
-                    <td class="p-4 font-medium text-slate-800">${nom}</td>
-                    <td class="p-4 text-slate-500">${tel}</td>
-                    <td class="p-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold ${est === 'Pagado' ? 'bg-[#eaf0ec] text-[#3b5542] border border-[#4a6b53]/20' : 'bg-[#fdf9ee] text-[#967637] border border-[#d9d0be]'}">
-                            ${est}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center space-x-1">
-                        <button onclick="abrirTicket('${num}', '${nom}', '${tel}')" class="bg-[#eaf0ec] hover:bg-[#d8e4db] text-[#3b5542] text-xs px-2.5 py-1.5 rounded-xl font-bold transition">🎟️ Ver Ticket</button>
-                        <button onclick="editarBoleto('${num}', '${nom}', '${tel}', '${est}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2.5 py-1.5 rounded-xl font-bold transition">Editar</button>
-                        <button onclick="eliminarBoleto('${num}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs px-2.5 py-1.5 rounded-xl font-bold transition">Eliminar</button>
-                    </td>
-                `;
-                tabla.appendChild(tr);
-            });
-
-            let totalBoletosVendidos = 0;
-            registros.forEach(r => {
-                const nums = String(r.numero || '').split(',');
-                totalBoletosVendidos += nums.length;
-            });
-
-            const montoTotal = calcularTotalRecaudado(pagadosList);
-
-            document.getElementById('totalRecaudado').innerText = `S/ ${montoTotal.toFixed(2)}`;
-            document.getElementById('totalVendidos').innerText = totalBoletosVendidos;
-            document.getElementById('totalDisponibles').innerText = Math.max(0, 100 - totalBoletosVendidos);
-        }
-
-        cargarDatos();
-    </script>
+  buscador.addEventListener('input', e => renderizar(e.target.value));
+  $('btnActualizar').addEventListener('click', cargarDatos);
+  cargarMemoriaLocal();
+  cargarDatos();
+</script>
 </body>
 </html>
