@@ -411,12 +411,12 @@
                 return;
             }
 
-            const mensaje = `Hola *${currentTicketData.nom}* 👋\n\n` +
-                            `¡Confirmación de participación en la *${tituloGlobal}*! 🎟️\n\n` +
-                            `📌 *Detalles de tu boleto:*\n` +
-                            `• *N° de Boleto:* #${currentTicketData.num}\n` +
-                            `• *Fecha del Sorteo:* ${fechaGlobal}\n\n` +
-                            `💚 ¡Muchas gracias por tu apoyo y mucha suerte!`;
+            const mensaje = `Hola *${currentTicketData.nom}* +
+                            `¡Confirmación de participación en la *${tituloGlobal}*! +
+                            `*Detalles de tu boleto:*\n` +
+                            `*N° de Boleto:* #${currentTicketData.num}\n` +
+                            `*Fecha del Sorteo:* ${fechaGlobal}\n\n` +
+                            `¡Muchas gracias por tu apoyo y mucha suerte!`;
 
             const urlWS = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             window.open(urlWS, '_blank');
