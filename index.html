@@ -50,20 +50,119 @@
       </article>
     </section>
 
+<section class="panel" id="panelCaja">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">RENDICIÓN DE CUENTAS</span>
+      <h2>Control del dinero</h2>
+      <p class="helper-text">Consulta las ventas y el dinero recibido por cada método de pago.</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-copy">
+        <span>Total pagado</span>
+        <strong id="cajaTotal">S/ 0.00</strong>
+        <small>Ventas con pago registrado</small>
+      </div>
+      <div class="stat-icon">S/</div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-copy">
+        <span>Total por Yape</span>
+        <strong id="cajaYape">S/ 0.00</strong>
+        <small>Pagos registrados por Yape</small>
+      </div>
+      <div class="stat-icon">Y</div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-copy">
+        <span>Total en efectivo</span>
+        <strong id="cajaEfectivo">S/ 0.00</strong>
+        <small>Pagos registrados en efectivo</small>
+      </div>
+      <div class="stat-icon">S/</div>
+    </article>
+  </div>
+
+  <h3>Resumen por vendedor</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Yape</th>
+          <th>Efectivo</th>
+          <th>Total pagado</th>
+          <th>Efectivo pendiente de entregar</th>
+        </tr>
+      </thead>
+      <tbody id="tablaCaja">
+        <tr>
+          <td colspan="5" class="empty-cell">Cargando resumen...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
     <section class="panel form-panel">
       <div class="section-heading">
         <div><span class="section-kicker">REGISTRO</span><h2 id="formTitulo">Registrar una compra</h2></div>
         <button type="button" id="btnCancelarEdicion" onclick="cancelarEdicion()" class="btn btn-quiet hidden">Cancelar edición</button>
       </div>
       <p class="helper-text">Para registrar varios boletos, separa sus números con comas. Ejemplo: <b>12, 13</b>.</p>
-      <form id="rifaForm" class="purchase-grid">
-        <label>N.º de boleto(s)<input type="text" id="numero" required placeholder="Ej. 1 o 10, 11"></label>
-        <label>Nombre del comprador<input type="text" id="nombre" required placeholder="Nombre y apellido"></label>
-        <label>Celular / WhatsApp<input type="tel" id="telefono" placeholder="Ej. 983965241"></label>
-        <label>Estado del pago<select id="estado"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></label>
-        <button type="submit" id="btnGuardar" class="btn btn-primary btn-save">Guardar y preparar ticket</button>
-      </form>
-    </section>
+     
+<form id="rifaForm" class="purchase-grid">
+  <label>N.º de boleto(s)
+    <input type="text" id="numero" required placeholder="Ej. 1 o 10, 11">
+  </label>
+
+  <label>Nombre del comprador
+    <input type="text" id="nombre" required placeholder="Nombre y apellido">
+  </label>
+
+  <label>Celular / WhatsApp
+    <input type="tel" id="telefono" placeholder="Ej. 983965241">
+  </label>
+
+  <label>Vendedor
+    <select id="vendedor" required>
+      <option value="Angelita">Angelita</option>
+      <option value="Scarlet">Scarlet</option>
+      <option value="Brandol">Brandol</option>
+      <option value="Meli">Meli</option>
+      <option value="Vendedor 5">Vendedor 5</option>
+    </select>
+  </label>
+
+  <label>Estado del pago
+    <select id="estado">
+      <option value="Pagado">Pagado</option>
+      <option value="Pendiente">Pendiente</option>
+    </select>
+  </label>
+
+  <label>¿Cómo pagó?
+    <select id="metodoPago" required>
+      <option value="Yape">Yape</option>
+      <option value="Efectivo">Efectivo</option>
+    </select>
+  </label>
+
+  <label>Monto recibido (S/)
+    <input type="number" id="monto" min="0" step="0.50" required placeholder="0.00">
+  </label>
+
+  <button type="submit" id="btnGuardar" class="btn btn-primary btn-save">
+    Guardar y preparar ticket
+  </button>
+</form>
+
 
     <section class="panel records-panel">
       <div class="section-heading records-heading">
