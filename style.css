@@ -389,3 +389,93 @@ body.modal-open { overflow: hidden; }
     height: 320px;
   }
 }
+
+/* ===== CONTROL DE VENTAS Y RENDICIÓN DE CAJA ===== */
+
+#panelCaja h3 {
+  margin: 24px 0 13px;
+  color: var(--green-dark);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#panelCaja .stats-grid {
+  margin-top: 18px;
+  margin-bottom: 12px;
+}
+
+#panelCaja .stat-card {
+  min-width: 0;
+  min-height: 115px;
+  padding: 20px;
+}
+
+#tablaCaja td {
+  vertical-align: middle;
+}
+
+#tablaCaja td:first-child {
+  color: var(--green-dark);
+  font-weight: 800;
+}
+
+#tablaCaja .btn {
+  min-height: 34px;
+  padding: 8px 11px;
+  font-size: 11px;
+}
+
+.purchase-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.purchase-grid #btnGuardar {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-width: 220px;
+}
+
+.purchase-grid label {
+  min-width: 0;
+}
+
+#vendedor,
+#metodoPago,
+#monto {
+  width: 100%;
+}
+
+#tablaRegistros .row-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .purchase-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #panelCaja .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .purchase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-grid #btnGuardar {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #panelCaja .stat-card {
+    min-height: 95px;
+    padding: 16px;
+  }
+
+  #panelCaja h3 {
+    font-size: 14px;
+  }
+}
