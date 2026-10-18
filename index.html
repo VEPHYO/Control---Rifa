@@ -382,4 +382,658 @@ async function cargarDatos() {
 }
 
 /* Vendedores */
-function render
+function renderVendedores() {
+  const lista = $('listaVendedores');
+  const select = $('vendedor');
+  const seleccionAnterior = select.value;
+
+  lista.innerHTML = vendedores.length
+    ? vendedores.map((nombre, indice) => `
+      <div style="display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap">
+        <label style="flex:1;min-width:180px">Vendedor ${indice + 1}
+          <input type="text" class="nombre-vendedor" data-index="${indice}" value="${escapar(nombre)}">
+        </label>
+        <button type="button" class="btn btn-quiet" data-quitar-vendedor="${indice}">Retirar</button>
+      </div>`).join('')
+    : '<p class="empty-cell">No hay vendedores registrados.</p>';
+
+  select.innerHTML = '<option value="">Selecciona vendedor</option>' +
+    vendedores.filter(v => String(v).trim()).map(nombre =>
+      `<option value="${escapar(nombre)}">${escapar(nombre)}</option>`
+    ).join('');
+
+  if (vendedores.includes(seleccionAnterior)) select.value = seleccionAnterior;
+}
+
+$('listaVendedores').addEventListener('input', e => {
+  if (!e.target.classList.contains('nombre-vendedor')) return;
+
+  const indice = Number(e.target.dataset.index);
+  if (Number.isInteger(indice) && indice >= 0) {
+    vendedores[indice] = e.target.value;
+    actualizarOpcionesVendedor();
+  }
+});
+
+function actualizarOpcionesVendedor() {
+  const select = $('vendedor');
+  const anterior = select.value;
+
+  select.innerHTML = '<option value="">Selecciona vendedor</option>' +
+    vendedores.filter(nombre => String(nombre).trim()).map(nombre =>
+      `<option value="${escapar(nombre.trim())}">${escapar(nombre.trim())}</option>`
+    ).join('');
+
+  if (vendedores.includes(anterior)) select.value = anterior;
+}
+
+$('listaVendedores').addEventListener('click', e => {
+  const boton = e.target.closest('[data-quitar-vendedor]');
+  if (!boton) return;
+
+  const indice = Number(boton.dataset.quitarVendedor);
+  if (!confirm(`¿Retirar a ${vendedores[indice]} de la lista actual? Las ventas anteriores se conservan.`)) return;
+
+  vendedores.splice(indice, 1);
+  renderVendedores();
+});
+
+$('btnAgregarVendedor').addEventListener('click', () => {
+  const campo = $('nuevoVendedor');
+  const nombre = campo.value.trim();
+
+  if (!nombre) {
+    alert('Escribe el nombre del vendedor.');
+    campo.focus();
+    return;
+  }
+
+  if (vendedores.some(v => v.trim().toLowerCase() === nombre.toLowerCase())) {
+    alert('Ese vendedor ya está en la lista.');
+    return;
+  }
+
+  vendedores.push(nombre);
+  campo.value = '';
+  renderVendedores();
+});
+
+$('nuevoVendedor').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    $('btnAgregarVendedor').click();
+  }
+});
+
+$('btnGuardarVendedores').addEventListener('click', async () => {
+  vendedores = [...document.querySelectorAll('.nombre-vendedor')]
+    .map(input => input.value.trim());
+
+  if (!vendedores.length || vendedores.some(nombre => !nombre)) {
+    alert('Deja al menos un vendedor y completa todos los nombres.');
+    return;
+  }
+
+  if (new Set(vendedores.map(v => v.toLowerCase())).size !== vendedores.length) {
+    alert('Hay nombres repetidos. Corrígelos antes de guardar.');
+    return;
+  }
+
+  const boton = $('btnGuardarVendedores');
+  boton.disabled = true;
+  boton.textContent = 'Guardando…';
+
+  try {
+    await enviarDatos({ action: 'guardarVendedores', vendedores });
+    await new Promise(resolve => setTimeout(resolve, 900));
+
+    const respuesta = await fetch(URL_API, { cache: 'no-store' });
+    const datos = await respuesta.json();
+
+    if (!Array.isArray(datos.vendedores)) {
+      throw new Error('No se recibió la lista guardada.');
+    }
+
+    vendedores = datos.vendedores;
+    renderVendedores();
+    renderCaja();
+
+    alert('Se solicitó guardar la lista. Si los nombres no aparecen al actualizar, revisa Apps Script.');
+  } catch (error) {
+    console.error(error);
+    alert('No se pudo confirmar el guardado. Revisa la conexión y actualiza la página.');
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Guardar lista de vendedores';
+  }
+});
+
+/* Configuración */
+configForm.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const totalNuevo = Math.floor(Number($('inputTotalBoletos').value));
+
+  if (!Number.isInteger(totalNuevo) || totalNuevo < 1) {
+    alert('El total de rifas debe ser un número entero mayor que cero.');
+    return;
+  }
+
+  btnGuardarConfig.disabled = true;
+  btnGuardarConfig.textContent = 'Guardando…';
+
+  tituloGlobal = $('inputTitulo').value.trim();
+  fechaGlobal = $('inputFecha').value.trim();
+  p1 = Number($('inputPrecio1').value);
+  p2 = Number($('inputPrecio2').value);
+  totalBoletos = totalNuevo;
+
+  if (!tituloGlobal || !fechaGlobal || !Number.isFinite(p1) || !Number.isFinite(p2) || p1 < 0 || p2 < 0) {
+    alert('Revisa el nombre, fecha y precios.');
+    btnGuardarConfig.disabled = false;
+    btnGuardarConfig.textContent = 'Guardar ajustes';
+    return;
+  }
+
+  localStorage.setItem('rifa_titulo', tituloGlobal);
+  localStorage.setItem('rifa_fecha', fechaGlobal);
+  localStorage.setItem('rifa_p1', p1);
+  localStorage.setItem('rifa_p2', p2);
+  localStorage.setItem('rifa_total', totalBoletos);
+
+  aplicarConfigUI();
+
+  try {
+    await enviarDatos({
+      action: 'updateConfig',
+      titulo: tituloGlobal,
+      fecha: fechaGlobal,
+      precio1: p1,
+      precio2: p2,
+      totalBoletos
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+    await cargarDatos();
+
+    alert('Se envió la solicitud de guardar los ajustes. Verifica que se hayan sincronizado en la página.');
+  } catch (err) {
+    alert('No se pudo contactar con Google Sheets.');
+  } finally {
+    btnGuardarConfig.disabled = false;
+    btnGuardarConfig.textContent = 'Guardar ajustes';
+  }
+});
+
+/* Vista previa de disponibilidad */
+function obtenerOcupadosLocales() {
+  const ocupados = new Set();
+
+  registros.forEach(r => {
+    String(r.numero || '').split(',').forEach(parte => {
+      const n = parseInt(parte.trim(), 10);
+      if (Number.isInteger(n) && n > 0) ocupados.add(n);
+    });
+  });
+
+  return ocupados;
+}
+
+function actualizarVistaNumeros() {
+  if (numeroEditando !== null) return;
+
+  const cantidad = Math.floor(Number($('numero').value) || 0);
+
+  if (cantidad < 1 || cantidad > totalBoletos) {
+    $('vistaNumeros').textContent = `Ingresa una cantidad entre 1 y ${totalBoletos}.`;
+    return;
+  }
+
+  const ocupados = obtenerOcupadosLocales();
+  const disponibles = [];
+
+  for (let n = 1; n <= totalBoletos; n++) {
+    if (!ocupados.has(n)) disponibles.push(String(n).padStart(3, '0'));
+    if (disponibles.length === cantidad) break;
+  }
+
+  $('vistaNumeros').textContent = disponibles.length === cantidad
+    ? `Vista previa: ${disponibles.join(', ')}. Los números se confirmarán al guardar.`
+    : `Solo quedan ${disponibles.length} números disponibles.`;
+}
+
+$('numero').addEventListener('input', actualizarVistaNumeros);
+
+/* Registro y edición */
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (guardando) return;
+
+  const editando = numeroEditando !== null;
+  const cantidadVal = Math.floor(Number($('numero').value));
+  const numVal = editando ? String(numeroEditando) : '';
+  const nomVal = $('nombre').value.trim();
+  const telVal = $('telefono').value.trim() || '---';
+  const estVal = $('estado').value;
+  const vendedorVal = $('vendedor').value;
+  const metodoVal = $('metodoPago').value;
+  const montoVal = Number($('monto').value);
+
+  if (!nomVal || !vendedorVal) {
+    alert('Completa el nombre del comprador y el vendedor.');
+    return;
+  }
+
+  if (!Number.isFinite(montoVal) || montoVal < 0) {
+    alert('Ingresa un monto válido.');
+    return;
+  }
+
+  if (!editando && (!Number.isInteger(cantidadVal) || cantidadVal < 1 || cantidadVal > totalBoletos)) {
+    alert(`Ingresa una cantidad entre 1 y ${totalBoletos}.`);
+    return;
+  }
+
+  const registroAnterior = editando
+    ? registros.find(r => String(r.numero) === String(numeroEditando))
+    : null;
+
+  if (editando && !registroAnterior) {
+    alert('No se encontró la venta para editar.');
+    return;
+  }
+
+  const idVenta = editando
+    ? String(registroAnterior.idVenta || '')
+    : (crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+  const payload = {
+    action: editando ? 'actualizarVenta' : 'registrarVenta',
+    idVenta,
+    numero: numVal,
+    cantidad: cantidadVal,
+    nombre: nomVal,
+    telefono: telVal,
+    estado: estVal,
+    vendedor: vendedorVal,
+    metodo: metodoVal,
+    monto: montoVal
+  };
+
+  guardando = true;
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = editando ? 'Actualizando…' : 'Asignando números…';
+
+  try {
+    await enviarDatos(payload);
+    await new Promise(resolve => setTimeout(resolve, 1300));
+    await cargarDatos();
+
+    const encontrado = registros.find(r => String(r.idVenta || '') === String(idVenta));
+
+    if (!encontrado) {
+      alert('No se pudo confirmar la venta. Actualiza la lista y revisa Google Sheets antes de volver a registrarla para evitar duplicados.');
+      return;
+    }
+
+    const numerosAsignados = encontrado.numero;
+
+    cancelarEdicion();
+    form.reset();
+    $('numero').value = 1;
+    $('estado').value = 'Pagado';
+    $('metodoPago').value = 'Yape';
+    $('monto').value = '';
+    actualizarVistaNumeros();
+
+    abrirTicket(numerosAsignados, nomVal, telVal);
+  } catch (err) {
+    console.error(err);
+    alert('No se pudo confirmar la venta. Revisa la conexión y Google Sheets.');
+  } finally {
+    guardando = false;
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = 'Guardar y preparar ticket';
+  }
+});
+
+/* Tickets y WhatsApp */
+window.abrirTicket = function(num, nom, tel = '---') {
+  currentTicketData = {
+    num: String(num),
+    nom: String(nom),
+    tel: String(tel)
+  };
+
+  $('ticketNumero').textContent = currentTicketData.num;
+  $('ticketNombre').textContent = currentTicketData.nom;
+  $('ticketTituloTexto').textContent = tituloGlobal;
+  $('ticketFechaTexto').textContent = fechaBonita(fechaGlobal);
+  $('modalTicket').classList.remove('hidden');
+  document.body.classList.add('modal-open');
+};
+
+window.cerrarModalTicket = function() {
+  $('modalTicket').classList.add('hidden');
+  document.body.classList.remove('modal-open');
+};
+
+window.enviarPorWhatsApp = function() {
+  let tel = String(currentTicketData.tel || '').replace(/\D/g, '');
+
+  if (tel.length === 9) tel = '51' + tel;
+
+  if (tel.length < 10) {
+    alert('Ingresa un número de celular válido para abrir WhatsApp.');
+    return;
+  }
+
+  const nombre = currentTicketData.nom.trim().split(/\s+/)[0];
+
+  const mensaje = `Hola, ${nombre}. Tu participación en ${tituloGlobal} ha sido registrada.\nTicket(s): ${currentTicketData.num}\nSorteo: ${fechaBonita(fechaGlobal)}.\nDescarga la imagen del ticket y adjúntala en WhatsApp. Gracias por participar.`;
+
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener');
+};
+
+window.descargarTicketImagen = async function() {
+  const ticket = $('ticketVisual');
+
+  if (typeof html2canvas !== 'function') {
+    alert('No se pudo cargar el generador de imágenes. Revisa tu conexión.');
+    return;
+  }
+
+  try {
+    const canvas = await html2canvas(ticket, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#fffdf9',
+      logging: false
+    });
+
+    const link = document.createElement('a');
+    link.download = `Ticket_Rifa_${currentTicketData.num.replace(/[^\w-]/g, '_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error(err);
+    alert('No se pudo generar la imagen del ticket.');
+  }
+};
+
+/* Eliminar, editar y cancelar */
+window.eliminarBoleto = async function(num) {
+  if (!confirm(`¿Seguro que deseas eliminar el registro #${num}?`)) return;
+
+  const registro = registros.find(r => String(r.numero) === String(num));
+
+  try {
+    await enviarDatos({
+      action: 'delete',
+      numero: num,
+      idVenta: registro?.idVenta || ''
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await cargarDatos();
+  } catch (err) {
+    alert('No se pudo enviar la solicitud de eliminación.');
+  }
+};
+
+window.editarBoleto = function(num, nom, tel, est) {
+  const registro = registros.find(r => String(r.numero) === String(num));
+
+  if (!registro) {
+    alert('No se encontró el registro.');
+    return;
+  }
+
+  numeroEditando = String(num);
+  $('numero').type = 'text';
+  $('numero').value = num;
+  $('etiquetaNumero').childNodes[0].textContent = 'N.º de boleto(s) ';
+  $('vistaNumeros').textContent = 'La edición conserva los números asignados originalmente.';
+  $('nombre').value = nom;
+  $('telefono').value = tel === '---' ? '' : tel;
+  $('estado').value = est;
+  $('vendedor').value = registro.vendedor || '';
+  $('metodoPago').value = registro.metodo || 'Yape';
+  $('monto').value = Number(registro.monto) || 0;
+  $('formTitulo').textContent = `Editando boleto(s) #${num}`;
+  btnGuardar.textContent = 'Actualizar registro';
+  $('btnCancelarEdicion').classList.remove('hidden');
+
+  form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+window.cancelarEdicion = function() {
+  numeroEditando = null;
+  form.reset();
+
+  $('numero').type = 'number';
+  $('numero').min = 1;
+  $('numero').max = totalBoletos;
+  $('numero').value = 1;
+  $('etiquetaNumero').childNodes[0].textContent = 'Cantidad de rifas ';
+  $('vistaNumeros').textContent = 'Los números disponibles se asignarán automáticamente.';
+  $('estado').value = 'Pagado';
+  $('metodoPago').value = 'Yape';
+  $('formTitulo').textContent = 'Registrar una compra';
+  btnGuardar.textContent = 'Guardar y preparar ticket';
+  $('btnCancelarEdicion').classList.add('hidden');
+
+  actualizarVistaNumeros();
+};
+
+$('btnCancelarEdicion').addEventListener('click', cancelarEdicion);
+
+/* Caja */
+function totalNumeros(registro) {
+  return String(registro.numero || '').split(',').map(x => x.trim()).filter(Boolean).length;
+}
+
+function estaPagado(r) {
+  return String(r.estado || '').trim().toLowerCase() === 'pagado';
+}
+
+function esMetodo(r, metodo) {
+  return String(r.metodo || '').trim().toLowerCase() === metodo.toLowerCase();
+}
+
+function montoPagado(r) {
+  return estaPagado(r) ? Math.max(0, Number(r.monto) || 0) : 0;
+}
+
+function efectivoEntregado(r) {
+  const valor = String(r.efectivoEntregado || 'No').trim().toLowerCase();
+  return valor === 'sí' || valor === 'si' || valor === 'true';
+}
+
+function renderCaja() {
+  const pagados = registros.filter(estaPagado);
+
+  const totalYape = pagados
+    .filter(r => esMetodo(r, 'Yape'))
+    .reduce((s, r) => s + montoPagado(r), 0);
+
+  const totalEfectivo = pagados
+    .filter(r => esMetodo(r, 'Efectivo'))
+    .reduce((s, r) => s + montoPagado(r), 0);
+
+  $('cajaTotal').textContent = dinero(totalYape + totalEfectivo);
+  $('cajaYape').textContent = dinero(totalYape);
+  $('cajaEfectivo').textContent = dinero(totalEfectivo);
+
+  const nombres = [...new Set([
+    ...vendedores,
+    ...registros.map(r => String(r.vendedor || '').trim()).filter(Boolean)
+  ])];
+
+  const cuerpo = $('tablaCaja');
+
+  if (!nombres.length) {
+    cuerpo.innerHTML = '<tr><td colspan="5" class="empty-cell">Aún no hay vendedores.</td></tr>';
+    return;
+  }
+
+  cuerpo.innerHTML = nombres.map(nombre => {
+    const ventas = pagados.filter(
+      r => String(r.vendedor || '').trim().toLowerCase() === nombre.toLowerCase()
+    );
+
+    const yape = ventas
+      .filter(r => esMetodo(r, 'Yape'))
+      .reduce((s, r) => s + montoPagado(r), 0);
+
+    const efectivo = ventas
+      .filter(r => esMetodo(r, 'Efectivo'))
+      .reduce((s, r) => s + montoPagado(r), 0);
+
+    const pendiente = ventas
+      .filter(r => esMetodo(r, 'Efectivo') && !efectivoEntregado(r))
+      .reduce((s, r) => s + montoPagado(r), 0);
+
+    const botones = ventas.filter(r => esMetodo(r, 'Efectivo')).map(r => {
+      const entregado = efectivoEntregado(r);
+
+      return `<button type="button" class="mini-btn"
+        data-entrega-numero="${escapar(r.numero)}"
+        data-entrega-id="${escapar(r.idVenta || '')}"
+        data-entrega-estado="${entregado ? 'no' : 'si'}">
+        ${entregado ? 'Desmarcar entrega' : 'Marcar entregado'} · #${escapar(r.numero)}
+      </button>`;
+    }).join(' ');
+
+    return `<tr>
+      <td><strong>${escapar(nombre)}</strong></td>
+      <td>${dinero(yape)}</td>
+      <td>${dinero(efectivo)}</td>
+      <td><strong>${dinero(yape + efectivo)}</strong></td>
+      <td>
+        <strong>${dinero(pendiente)}</strong>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+          ${botones || '<span class="muted-cell">Sin efectivo registrado</span>'}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+$('tablaCaja').addEventListener('click', async e => {
+  const boton = e.target.closest('[data-entrega-numero]');
+  if (!boton) return;
+
+  const numero = boton.dataset.entregaNumero;
+  const entregado = boton.dataset.entregaEstado === 'si';
+
+  if (!confirm(
+    entregado
+      ? `¿Confirmas que el efectivo del registro #${numero} ya fue entregado?`
+      : `¿Deseas volver a marcar como pendiente el efectivo del registro #${numero}?`
+  )) return;
+
+  boton.disabled = true;
+
+  try {
+    await enviarDatos({
+      action: 'entregaEfectivo',
+      numero,
+      idVenta: boton.dataset.entregaId,
+      entregado
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await cargarDatos();
+  } catch (err) {
+    alert('No se pudo actualizar la rendición de efectivo.');
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+/* Tabla de ventas */
+function renderizar(filtro = '') {
+  tabla.innerHTML = '';
+
+  const query = filtro.toLowerCase().trim();
+
+  const filtrados = registros.filter(r =>
+    String(r.nombre || '').toLowerCase().includes(query) ||
+    String(r.numero || '').toLowerCase().includes(query) ||
+    String(r.telefono || '').toLowerCase().includes(query) ||
+    String(r.vendedor || '').toLowerCase().includes(query)
+  );
+
+  if (!filtrados.length) {
+    tabla.innerHTML = `<tr><td colspan="5" class="empty-cell">${
+      registros.length
+        ? 'No hay resultados para tu búsqueda.'
+        : 'Aún no hay registros o no se pudo conectar con la hoja.'
+    }</td></tr>`;
+  } else {
+    filtrados.forEach(r => {
+      const num = String(r.numero || '---');
+      const nom = String(r.nombre || '---');
+      const tel = String(r.telefono || '---');
+      const est = String(r.estado || 'Pendiente');
+
+      const tr = document.createElement('tr');
+      const badgeClass = est.toLowerCase() === 'pagado' ? 'paid' : 'pending';
+
+      tr.innerHTML = `<td><span class="number-cell">#${escapar(num)}</span></td>
+        <td>
+          <strong class="buyer-name">${escapar(nom)}</strong>
+          <div class="muted-cell">${escapar(r.vendedor || 'Sin vendedor')}</div>
+          <div class="muted-cell">${escapar(r.metodo || 'Sin método')} · ${dinero(r.monto)}</div>
+        </td>
+        <td class="muted-cell">${escapar(tel)}</td>
+        <td><span class="payment-badge ${badgeClass}">${escapar(est)}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="mini-btn ticket-btn" data-action="ticket">Ticket</button>
+            <button class="mini-btn edit-btn" data-action="edit">Editar</button>
+            <button class="mini-btn delete-btn" data-action="delete">Eliminar</button>
+          </div>
+        </td>`;
+
+      tr.querySelector('[data-action="ticket"]').addEventListener(
+        'click', () => abrirTicket(num, nom, tel)
+      );
+
+      tr.querySelector('[data-action="edit"]').addEventListener(
+        'click', () => editarBoleto(num, nom, tel, est)
+      );
+
+      tr.querySelector('[data-action="delete"]').addEventListener(
+        'click', () => eliminarBoleto(num)
+      );
+
+      tabla.appendChild(tr);
+    });
+  }
+
+  const pagados = registros.filter(estaPagado);
+  const ocupados = obtenerOcupadosLocales();
+
+  $('totalRecaudado').textContent = dinero(
+    pagados.reduce((s, r) => s + montoPagado(r), 0)
+  );
+
+  $('totalVendidos').textContent = ocupados.size;
+  $('totalDisponibles').textContent = Math.max(0, totalBoletos - ocupados.size);
+  $('textoTotalBoletos').textContent = `De un total de ${totalBoletos}`;
+
+  actualizarVistaNumeros();
+}
+
+buscador.addEventListener('input', e => renderizar(e.target.value));
+$('btnActualizar').addEventListener('click', cargarDatos);
+
+cargarMemoriaLocal();
+cargarDatos();
+</script>
+</body>
+</html>
