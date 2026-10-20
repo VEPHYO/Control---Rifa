@@ -707,14 +707,19 @@ window.abrirTicket = function(num, nom, tel = '---') {
     tel: String(tel)
   };
 
-  $('ticketNumero').textContent = currentTicketData.num;
+  const numeros = currentTicketData.num
+    .split(',')
+    .map(n => n.trim())
+    .filter(Boolean);
+
+  $('ticketNumero').textContent = numeros.join(' · ');
   $('ticketNombre').textContent = currentTicketData.nom;
   $('ticketTituloTexto').textContent = tituloGlobal;
   $('ticketFechaTexto').textContent = fechaBonita(fechaGlobal);
+
   $('modalTicket').classList.remove('hidden');
   document.body.classList.add('modal-open');
 };
-
 window.cerrarModalTicket = function() {
   $('modalTicket').classList.add('hidden');
   document.body.classList.remove('modal-open');
