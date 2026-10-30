@@ -500,3 +500,334 @@ body.modal-open { overflow: hidden; }
     font-size: 14px;
   }
 }
+/* =====================================
+   MÓDULO DE PREMIOS
+===================================== */
+
+.premio-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.premio-form label,
+.sorteo-controls > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #62735c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.premio-form input,
+.sorteo-controls select {
+  min-height: 45px;
+}
+
+.premio-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: end;
+}
+
+.premio-preview {
+  grid-column: 1 / -1;
+}
+
+.premio-preview img {
+  display: block;
+  width: 150px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.premios-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 30px 0 14px;
+}
+
+.premios-list-heading h3 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 15px;
+}
+
+.premios-list-heading span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.premios-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.premio-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.premio-card > img,
+.premio-sin-imagen {
+  display: grid;
+  width: 100%;
+  height: 165px;
+  object-fit: cover;
+  place-items: center;
+  background: #f2f3ed;
+  color: #899286;
+  font-size: 12px;
+}
+
+.premio-card-body {
+  padding: 15px;
+}
+
+.premio-card-body h3 {
+  margin: 9px 0 5px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: 19px;
+}
+
+.premio-card-body p {
+  margin: 0 0 9px;
+  color: #7d8878;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.premio-card-body small {
+  color: #92998d;
+  font-size: 10px;
+}
+
+.premio-estado {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #edf3e9;
+  color: #55734c;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.premio-estado.sorteado {
+  background: #f5f0e4;
+  color: #987c40;
+}
+
+.premio-card-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+/* =====================================
+   PREPARACIÓN DEL SORTEO
+===================================== */
+
+.sorteo-controls {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr auto;
+  align-items: end;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.check-pendientes {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  min-height: 45px;
+  gap: 9px !important;
+}
+
+.check-pendientes input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--green);
+}
+
+.sorteo-preparado {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 22px;
+  align-items: center;
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #e5e8de;
+  border-radius: 17px;
+  background: #fafbf7;
+}
+
+.sorteo-imagen img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.sorteo-info h3 {
+  margin: 8px 0;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: 25px;
+}
+
+.sorteo-info p {
+  color: #7d8878;
+  font-size: 12px;
+}
+
+.sorteo-info small {
+  color: #92998d;
+  font-size: 10px;
+}
+
+.btn-iniciar-sorteo {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 52px;
+  font-size: 14px;
+}
+
+/* =====================================
+   PANTALLA DE SORTEO
+===================================== */
+
+.sorteo-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 720px);
+  min-height: 420px;
+  padding: 55px 30px 35px;
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 26px;
+  background: #fffefa;
+  box-shadow: 0 30px 100px rgba(0,0,0,.25);
+  text-align: center;
+}
+
+.sorteo-modal-card h2 {
+  margin: 12px 0 20px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: clamp(26px, 5vw, 38px);
+}
+
+.ruleta-numero {
+  display: grid;
+  place-items: center;
+  width: min(250px, 75%);
+  min-height: 150px;
+  margin: 20px auto;
+  border: 2px solid #d9c99f;
+  border-radius: 24px;
+  background: #f5f3e9;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: clamp(55px, 12vw, 85px);
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(42,60,39,.08);
+}
+
+.texto-sorteo {
+  color: #84907e;
+  font-size: 14px;
+}
+
+.resultado-ganador {
+  margin-top: 24px;
+  padding: 23px;
+  border: 1px solid #e3dfce;
+  border-radius: 18px;
+  background: #faf8ef;
+  animation: aparecerGanador .5s ease both;
+}
+
+.resultado-ganador > span {
+  color: #9a8049;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.resultado-ganador > strong {
+  display: block;
+  margin: 12px 0;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: 48px;
+}
+
+.resultado-ganador h3 {
+  margin: 5px 0;
+  color: #304b39;
+  font-size: 24px;
+}
+
+.resultado-ganador p {
+  margin-bottom: 20px;
+  color: #7d8878;
+  font-size: 13px;
+}
+
+@keyframes aparecerGanador {
+  from { opacity: 0; transform: translateY(15px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 900px) {
+  .premios-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sorteo-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sorteo-controls > button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .premio-form,
+  .premios-grid,
+  .sorteo-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .premio-form-actions {
+    grid-column: 1;
+  }
+
+  .sorteo-preparado {
+    grid-template-columns: 1fr;
+  }
+
+  .sorteo-imagen img {
+    height: 190px;
+  }
+
+  .sorteo-modal-card {
+    padding: 48px 16px 22px;
+  }
+
+  .resultado-ganador {
+    padding: 18px 12px;
+  }
+}
