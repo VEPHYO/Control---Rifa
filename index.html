@@ -124,7 +124,143 @@
     </div>
     <p class="settings-note">Marca el efectivo como entregado cuando el vendedor te dé el dinero.</p>
   </section>
+<!-- MÓDULO DE PREMIOS Y SORTEOS -->
+<section class="panel" id="panelPremios">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">ORGANIZACIÓN DEL EVENTO</span>
+      <h2>Premios de la rifa</h2>
+      <p class="helper-text">Registra los premios y administra las imágenes de cada uno.</p>
+    </div>
+  </div>
 
+  <form id="formPremio" class="premio-form">
+    <input type="hidden" id="premioId">
+
+    <label>Nombre del premio
+      <input id="premioNombre" type="text" required placeholder="Ej. Canasta de víveres">
+    </label>
+
+    <label>Descripción
+      <input id="premioDescripcion" type="text" placeholder="Detalle del premio">
+    </label>
+
+    <label>Donado por
+      <input id="premioDonante" type="text" placeholder="Empresa o persona">
+    </label>
+
+    <label>Imagen del premio
+      <input id="premioImagen" type="file" accept="image/jpeg,image/png,image/webp">
+    </label>
+
+    <div id="premioVistaPrevia" class="premio-preview hidden"></div>
+
+    <div class="premio-form-actions">
+      <button class="btn btn-primary" id="btnGuardarPremio" type="submit">Guardar premio</button>
+      <button class="btn btn-quiet hidden" id="btnCancelarPremio" type="button">Cancelar edición</button>
+    </div>
+  </form>
+
+  <div class="premios-list-heading">
+    <h3>Premios registrados</h3>
+    <span id="contadorPremios">0 premios</span>
+  </div>
+  <div id="listaPremios" class="premios-grid">
+    <p class="empty-cell">Cargando premios…</p>
+  </div>
+</section>
+
+<!-- MÓDULO DE SORTEO EN VIVO -->
+<section class="panel" id="panelSorteo">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">MOMENTO DEL SORTEO</span>
+      <h2>Realizar sorteo</h2>
+      <p class="helper-text">Selecciona el premio y prepara la pantalla para anunciar al ganador.</p>
+    </div>
+  </div>
+
+  <div class="sorteo-controls">
+    <label>¿Qué premio sortearemos?
+      <select id="seleccionPremio">
+        <option value="">Cargando premios…</option>
+      </select>
+    </label>
+
+    <label class="check-pendientes">
+      <input type="checkbox" id="incluirPendientes">
+      Incluir boletos pendientes de pago
+    </label>
+
+    <button type="button" class="btn btn-primary" id="btnPrepararSorteo">
+      Preparar sorteo
+    </button>
+  </div>
+
+  <div id="sorteoPreparado" class="sorteo-preparado hidden">
+    <div id="sorteoImagen" class="sorteo-imagen"></div>
+    <div class="sorteo-info">
+      <span class="section-kicker">PREMIO SELECCIONADO</span>
+      <h3 id="sorteoNombrePremio"></h3>
+      <p id="sorteoDescripcionPremio"></p>
+      <small id="sorteoDonante"></small>
+    </div>
+    <button type="button" class="btn btn-primary btn-iniciar-sorteo" id="btnIniciarSorteo">
+      ✦ Iniciar sorteo
+    </button>
+  </div>
+</section>
+
+<!-- HISTORIAL DE GANADORES -->
+<section class="panel" id="panelGanadores">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">RESULTADOS</span>
+      <h2>Historial de ganadores</h2>
+      <p class="helper-text">Consulta los premios sorteados y gestiona sus notificaciones.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Premio</th>
+          <th>Número</th>
+          <th>Ganador</th>
+          <th>Fecha</th>
+          <th>Notificación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaGanadores">
+        <tr><td colspan="6" class="empty-cell">Cargando historial…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PANTALLA DE REVELACIÓN -->
+<div id="modalSorteo" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tituloModalSorteo">
+  <div class="modal-backdrop"></div>
+  <div class="sorteo-modal-card">
+    <button type="button" class="modal-close" id="btnCerrarSorteo" aria-label="Cerrar">×</button>
+    <span class="section-kicker">GRAN RIFA</span>
+    <h2 id="tituloModalSorteo">¡Vamos a sortear!</h2>
+    <div id="ruletaNumero" class="ruleta-numero">---</div>
+    <p id="textoSorteo" class="texto-sorteo">La suerte está por decidirse…</p>
+
+    <div id="resultadoGanador" class="resultado-ganador hidden">
+      <span>¡TENEMOS GANADOR!</span>
+      <strong id="ganadorNumero"></strong>
+      <h3 id="ganadorNombre"></h3>
+      <p id="ganadorPremio"></p>
+      <button type="button" class="btn btn-whatsapp" id="btnWhatsAppGanador">
+        Abrir WhatsApp para notificar
+      </button>
+    </div>
+  </div>
+</div>
   <section class="panel form-panel">
     <div class="section-heading">
       <div>
@@ -346,8 +482,10 @@ async function cargarDatos() {
 
     const res = await respuesta.json();
 
-    registros = Array.isArray(res.boletos) ? res.boletos : [];
-    vendedores = Array.isArray(res.vendedores) ? res.vendedores : [];
+registros = Array.isArray(res.boletos) ? res.boletos : [];
+vendedores = Array.isArray(res.vendedores) ? res.vendedores : [];
+premios = Array.isArray(res.premios) ? res.premios : [];
+ganadores = Array.isArray(res.ganadores) ? res.ganadores : [];
 
     if (res.config) {
       tituloGlobal = res.config.titulo || tituloGlobal;
@@ -364,9 +502,11 @@ async function cargarDatos() {
     }
 
     aplicarConfigUI();
-    renderizar(buscador.value);
-    renderVendedores();
-    renderCaja();
+renderizar(buscador.value);
+renderVendedores();
+renderCaja();
+renderPremios();
+renderGanadores();
   } catch (err) {
     console.error('Error al cargar Google Sheets:', err);
     renderizar(buscador.value);
@@ -1036,7 +1176,462 @@ function renderizar(filtro = '') {
 
 buscador.addEventListener('input', e => renderizar(e.target.value));
 $('btnActualizar').addEventListener('click', cargarDatos);
+/* =====================================
+   PREMIOS Y SORTEOS
+===================================== */
 
+let premios = [];
+let ganadores = [];
+let imagenPremioActual = '';
+let ganadorActual = null;
+let sorteoEnProceso = false;
+
+const formPremio = $('formPremio');
+
+function limpiarFormularioPremio() {
+  formPremio.reset();
+  $('premioId').value = '';
+  imagenPremioActual = '';
+  $('premioVistaPrevia').innerHTML = '';
+  $('premioVistaPrevia').classList.add('hidden');
+  $('btnGuardarPremio').textContent = 'Guardar premio';
+  $('btnCancelarPremio').classList.add('hidden');
+}
+
+$('btnCancelarPremio').addEventListener('click', limpiarFormularioPremio);
+
+$('premioImagen').addEventListener('change', () => {
+  const archivo = $('premioImagen').files[0];
+  if (!archivo) return;
+
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(archivo.type)) {
+    alert('Selecciona una imagen JPG, PNG o WEBP.');
+    $('premioImagen').value = '';
+    return;
+  }
+
+  const url = URL.createObjectURL(archivo);
+  $('premioVistaPrevia').innerHTML =
+    `<img src="${url}" alt="Vista previa del premio">`;
+  $('premioVistaPrevia').classList.remove('hidden');
+});
+
+async function comprimirImagenPremio(archivo) {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+
+    lector.onload = () => {
+      const imagen = new Image();
+
+      imagen.onload = () => {
+        const maximo = 1200;
+        const escala = Math.min(1, maximo / Math.max(imagen.width, imagen.height));
+        const canvas = document.createElement('canvas');
+
+        canvas.width = Math.round(imagen.width * escala);
+        canvas.height = Math.round(imagen.height * escala);
+
+        const contexto = canvas.getContext('2d');
+        contexto.drawImage(imagen, 0, 0, canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+        resolve({
+          base64: dataUrl.split(',')[1],
+          mimeType: 'image/jpeg'
+        });
+      };
+
+      imagen.onerror = reject;
+      imagen.src = lector.result;
+    };
+
+    lector.onerror = reject;
+    lector.readAsDataURL(archivo);
+  });
+}
+
+async function subirImagenPremio(archivo) {
+  const imagen = await comprimirImagenPremio(archivo);
+
+  await enviarDatos({
+    action: 'subirImagenPremio',
+    base64: imagen.base64,
+    mimeType: imagen.mimeType,
+    nombreArchivo: archivo.name.replace(/\.[^.]+$/, '') + '.jpg'
+  });
+
+  await new Promise(resolve => setTimeout(resolve, 1200));
+
+  const respuesta = await fetch(URL_API, { cache: 'no-store' });
+  const datos = await respuesta.json();
+
+  // La URL de la imagen se recupera al guardar el premio.
+  return datos;
+}
+
+async function obtenerImagenSubida(archivo) {
+  const imagen = await comprimirImagenPremio(archivo);
+
+  const respuesta = await fetch(URL_API, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'subirImagenPremio',
+      base64: imagen.base64,
+      mimeType: imagen.mimeType,
+      nombreArchivo: archivo.name.replace(/\.[^.]+$/, '') + '.jpg'
+    })
+  });
+
+  return respuesta;
+}
+
+formPremio.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const id = $('premioId').value;
+  const archivo = $('premioImagen').files[0];
+  const boton = $('btnGuardarPremio');
+
+  const datos = {
+    nombre: $('premioNombre').value.trim(),
+    descripcion: $('premioDescripcion').value.trim(),
+    donante: $('premioDonante').value.trim(),
+    imagenUrl: imagenPremioActual
+  };
+
+  if (!datos.nombre) {
+    alert('Escribe el nombre del premio.');
+    return;
+  }
+
+  if (!id && !archivo) {
+    alert('Selecciona una imagen para el premio.');
+    return;
+  }
+
+  boton.disabled = true;
+  boton.textContent = 'Guardando…';
+
+  try {
+    if (archivo) {
+      const imagen = await comprimirImagenPremio(archivo);
+
+      await enviarDatos({
+        action: 'subirImagenPremio',
+        base64: imagen.base64,
+        mimeType: imagen.mimeType,
+        nombreArchivo: archivo.name.replace(/\.[^.]+$/, '') + '.jpg'
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 1300));
+
+      // La respuesta POST es opaca por no-cors.
+      // Para recuperar la URL del archivo, se necesita una pequeña
+      // ampliación en Apps Script que se explica más abajo.
+      throw new Error('La subida necesita devolver la URL de Drive. Aplica primero el ajuste de Apps Script indicado al final.');
+    }
+
+    await enviarDatos({
+      action: id ? 'editarPremio' : 'guardarPremio',
+      id,
+      ...datos
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 900));
+    await cargarDatos();
+    limpiarFormularioPremio();
+
+    alert('Premio guardado.');
+  } catch (error) {
+    console.error(error);
+    alert(error.message || 'No se pudo guardar el premio.');
+  } finally {
+    boton.disabled = false;
+    boton.textContent = id ? 'Actualizar premio' : 'Guardar premio';
+  }
+});
+
+function renderPremios() {
+  const lista = $('listaPremios');
+  const selector = $('seleccionPremio');
+
+  $('contadorPremios').textContent =
+    `${premios.length} ${premios.length === 1 ? 'premio' : 'premios'}`;
+
+  if (!premios.length) {
+    lista.innerHTML = '<p class="empty-cell">Todavía no hay premios registrados.</p>';
+  } else {
+    lista.innerHTML = premios.map(p => `
+      <article class="premio-card">
+        ${p.imagenUrl
+          ? `<img src="${escapar(p.imagenUrl)}" alt="${escapar(p.nombre)}">`
+          : '<div class="premio-sin-imagen">Sin imagen</div>'}
+        <div class="premio-card-body">
+          <span class="premio-estado ${p.estado === 'Sorteado' ? 'sorteado' : ''}">
+            ${escapar(p.estado)}
+          </span>
+          <h3>${escapar(p.nombre)}</h3>
+          <p>${escapar(p.descripcion || '')}</p>
+          <small>Donado por: ${escapar(p.donante || 'No especificado')}</small>
+          ${p.estado === 'Pendiente' ? `
+            <div class="premio-card-actions">
+              <button class="mini-btn edit-btn" type="button"
+                onclick="editarPremio('${escapar(p.id)}')">Editar</button>
+              <button class="mini-btn delete-btn" type="button"
+                onclick="borrarPremio('${escapar(p.id)}')">Eliminar</button>
+            </div>` : ''}
+        </div>
+      </article>
+    `).join('');
+  }
+
+  const pendientes = premios.filter(p => p.estado === 'Pendiente');
+
+  selector.innerHTML = '<option value="">Selecciona un premio</option>' +
+    pendientes.map(p =>
+      `<option value="${escapar(p.id)}">${escapar(p.nombre)}</option>`
+    ).join('');
+
+  $('sorteoPreparado').classList.add('hidden');
+}
+
+window.editarPremio = function(id) {
+  const p = premios.find(x => String(x.id) === String(id));
+  if (!p) return;
+
+  $('premioId').value = p.id;
+  $('premioNombre').value = p.nombre;
+  $('premioDescripcion').value = p.descripcion;
+  $('premioDonante').value = p.donante;
+  imagenPremioActual = p.imagenUrl || '';
+
+  $('premioVistaPrevia').innerHTML = imagenPremioActual
+    ? `<img src="${escapar(imagenPremioActual)}" alt="Imagen actual del premio">`
+    : '';
+
+  $('premioVistaPrevia').classList.toggle('hidden', !imagenPremioActual);
+  $('btnGuardarPremio').textContent = 'Actualizar premio';
+  $('btnCancelarPremio').classList.remove('hidden');
+
+  $('panelPremios').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.borrarPremio = async function(id) {
+  const p = premios.find(x => String(x.id) === String(id));
+  if (!p || !confirm(`¿Eliminar el premio "${p.nombre}"?`)) return;
+
+  try {
+    await enviarDatos({ action: 'eliminarPremio', id });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await cargarDatos();
+  } catch (error) {
+    alert('No se pudo eliminar el premio.');
+  }
+};
+
+$('btnPrepararSorteo').addEventListener('click', () => {
+  const id = $('seleccionPremio').value;
+  const premio = premios.find(p => String(p.id) === String(id));
+
+  if (!premio) {
+    alert('Selecciona un premio pendiente.');
+    return;
+  }
+
+  $('sorteoNombrePremio').textContent = premio.nombre;
+  $('sorteoDescripcionPremio').textContent = premio.descripcion || '';
+  $('sorteoDonante').textContent = premio.donante
+    ? `Donado por: ${premio.donante}`
+    : '';
+
+  $('sorteoImagen').innerHTML = premio.imagenUrl
+    ? `<img src="${escapar(premio.imagenUrl)}" alt="${escapar(premio.nombre)}">`
+    : '';
+
+  $('sorteoPreparado').dataset.premioId = premio.id;
+  $('sorteoPreparado').classList.remove('hidden');
+  $('sorteoPreparado').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+function sonidoSorteo(frecuencia = 600, duracion = 0.08) {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const audio = new AudioContextClass();
+    const oscilador = audio.createOscillator();
+    const volumen = audio.createGain();
+
+    oscilador.type = 'sine';
+    oscilador.frequency.value = frecuencia;
+    volumen.gain.value = 0.045;
+
+    oscilador.connect(volumen);
+    volumen.connect(audio.destination);
+
+    oscilador.start();
+    oscilador.stop(audio.currentTime + duracion);
+    oscilador.onended = () => audio.close();
+  } catch (error) {
+    console.warn('Audio no disponible', error);
+  }
+}
+
+function animarRuleta() {
+  return new Promise(resolve => {
+    const pantalla = $('ruletaNumero');
+    const inicio = Date.now();
+    const duracion = 4500;
+    let demora = 45;
+
+    function paso() {
+      const numero = Math.floor(Math.random() * totalBoletos) + 1;
+      pantalla.textContent = String(numero).padStart(3, '0');
+      sonidoSorteo(450 + Math.random() * 350, 0.035);
+
+      const transcurrido = Date.now() - inicio;
+      if (transcurrido >= duracion) {
+        resolve();
+        return;
+      }
+
+      demora += transcurrido > 3000 ? 35 : 5;
+      setTimeout(paso, demora);
+    }
+
+    paso();
+  });
+}
+
+$('btnIniciarSorteo').addEventListener('click', async () => {
+  if (sorteoEnProceso) return;
+
+  const premioId = $('sorteoPreparado').dataset.premioId;
+  if (!premioId) return;
+
+  if (!confirm('¿Estás lista para iniciar el sorteo de este premio?')) return;
+
+  sorteoEnProceso = true;
+  $('btnIniciarSorteo').disabled = true;
+  $('modalSorteo').classList.remove('hidden');
+  $('resultadoGanador').classList.add('hidden');
+  $('tituloModalSorteo').textContent = '¡Mucha suerte!';
+  $('textoSorteo').textContent = 'Estamos eligiendo al ganador…';
+  $('ruletaNumero').textContent = '---';
+
+  try {
+    await animarRuleta();
+
+    await enviarDatos({
+      action: 'realizarSorteo',
+      premioId,
+      incluirPendientes: $('incluirPendientes').checked
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1100));
+    await cargarDatos();
+
+    const ganador = ganadores.find(g => String(g.premioId) === String(premioId));
+
+    if (!ganador) {
+      throw new Error('No se pudo recuperar el resultado. Actualiza el historial antes de repetir el sorteo.');
+    }
+
+    ganadorActual = ganador;
+
+    $('ruletaNumero').textContent = ganador.numero;
+    $('tituloModalSorteo').textContent = '¡Tenemos ganador!';
+    $('textoSorteo').textContent = '¡Felicitaciones!';
+
+    $('ganadorNumero').textContent = `N.º ${ganador.numero}`;
+    $('ganadorNombre').textContent = ganador.nombre;
+    $('ganadorPremio').textContent = ganador.premio;
+    $('resultadoGanador').classList.remove('hidden');
+
+    sonidoSorteo(880, 0.35);
+  } catch (error) {
+    console.error(error);
+    $('textoSorteo').textContent = error.message || 'No se pudo completar el sorteo.';
+    alert(error.message || 'No se pudo completar el sorteo.');
+  } finally {
+    sorteoEnProceso = false;
+    $('btnIniciarSorteo').disabled = false;
+  }
+});
+
+$('btnCerrarSorteo').addEventListener('click', () => {
+  $('modalSorteo').classList.add('hidden');
+});
+
+$('btnWhatsAppGanador').addEventListener('click', () => {
+  if (!ganadorActual) return;
+
+  let telefono = String(ganadorActual.telefono || '').replace(/\D/g, '');
+  if (telefono.length === 9) telefono = '51' + telefono;
+
+  if (telefono.length < 10) {
+    alert('El ganador no tiene un celular válido registrado.');
+    return;
+  }
+
+  const mensaje =
+    `¡Felicitaciones, ${ganadorActual.nombre}! 🎉\n` +
+    `Has ganado: ${ganadorActual.premio}.\n` +
+    `Tu número ganador fue: ${ganadorActual.numero}.\n` +
+    `¡Muchas gracias por participar!`;
+
+  window.open(
+    `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`,
+    '_blank',
+    'noopener'
+  );
+});
+
+function renderGanadores() {
+  const cuerpo = $('tablaGanadores');
+
+  if (!ganadores.length) {
+    cuerpo.innerHTML =
+      '<tr><td colspan="6" class="empty-cell">Todavía no hay ganadores.</td></tr>';
+    return;
+  }
+
+  cuerpo.innerHTML = ganadores.map(g => {
+    const fecha = g.fecha ? new Date(g.fecha).toLocaleString('es-PE') : '—';
+
+    return `<tr>
+      <td>${escapar(g.premio)}</td>
+      <td><strong class="number-cell">#${escapar(g.numero)}</strong></td>
+      <td><strong class="buyer-name">${escapar(g.nombre)}</strong></td>
+      <td>${escapar(fecha)}</td>
+      <td>${escapar(g.notificacion || 'Pendiente')}</td>
+      <td>
+        <button type="button" class="mini-btn ticket-btn"
+          onclick="notificarGanador('${escapar(g.id)}')">
+          Marcar notificado
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.notificarGanador = async function(id) {
+  try {
+    await enviarDatos({
+      action: 'actualizarNotificacion',
+      id,
+      notificado: true
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await cargarDatos();
+  } catch (error) {
+    alert('No se pudo actualizar la notificación.');
+  }
+};
 cargarMemoriaLocal();
 cargarDatos();
 </script>
