@@ -255,6 +255,8 @@
       <strong id="ganadorNumero"></strong>
       <h3 id="ganadorNombre"></h3>
       <p id="ganadorPremio"></p>
+      <label class="mensaje-label" for="mensajeGanador">Mensaje para el ganador (editable)</label>
+      <textarea id="mensajeGanador" rows="5" class="mensaje-ganador"></textarea>
       <button type="button" class="btn btn-whatsapp" id="btnWhatsAppGanador">
         Abrir WhatsApp para notificar
       </button>
@@ -1289,66 +1291,56 @@ async function obtenerImagenSubida(archivo) {
 }
 
 
+// Espera la confirmación en Sheets; no depende de una pausa fija.
+async function esperarPremioGuardado(id, nombre, idsAntes, intentos = 12) {
+  for (let i = 0; i < intentos; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const respuesta = await fetch(URL_API + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!respuesta.ok) continue;
+    const res = await respuesta.json();
+    if (!res.ok) throw new Error(res.error || 'Error al consultar Google Sheets');
+    const lista = Array.isArray(res.premios) ? res.premios : [];
+    const hallado = id
+      ? lista.find(p => String(p.id) === String(id) && p.nombre === nombre)
+      : lista.find(p => p.nombre === nombre && !idsAntes.has(String(p.id)));
+    if (hallado) {
+      await cargarDatos();
+      return hallado;
+    }
+  }
+  throw new Error('No se pudo confirmar el premio. Comprueba la hoja Premios y las ejecuciones de Apps Script antes de intentar de nuevo.');
+}
+
 formPremio.addEventListener('submit', async e => {
   e.preventDefault();
-
   const id = $('premioId').value;
   const archivo = $('premioImagen').files[0];
   const boton = $('btnGuardarPremio');
-
   const datos = {
     nombre: $('premioNombre').value.trim(),
     descripcion: $('premioDescripcion').value.trim(),
     donante: $('premioDonante').value.trim(),
     imagenUrl: imagenPremioActual
   };
-
-  if (!datos.nombre) {
-    alert('Escribe el nombre del premio.');
-    return;
-  }
-
-  if (!id && !archivo) {
-    alert('Selecciona una imagen para el premio.');
-    return;
-  }
-
+  if (!datos.nombre) return alert('Escribe el nombre del premio.');
+  if (!id && !archivo) return alert('Selecciona una imagen para el premio.');
   boton.disabled = true;
   boton.textContent = 'Guardando…';
-
+  const idsAntes = new Set(premios.map(p => String(p.id)));
   try {
     if (archivo) {
       const imagen = await comprimirImagenPremio(archivo);
-
       datos.base64 = imagen.base64;
       datos.mimeType = imagen.mimeType;
-      datos.nombreArchivo =
-        archivo.name.replace(/\.[^.]+$/, '') + '.jpg';
+      datos.nombreArchivo = archivo.name.replace(/\.[^.]+$/, '') + '.jpg';
     }
-
-    await enviarDatos({
-      action: id ? 'editarPremio' : 'guardarPremio',
-      id,
-      ...datos
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 1800));
-    await cargarDatos();
-
-    const guardado = id
-      ? premios.some(p => String(p.id) === String(id))
-      : premios.some(p => p.nombre === datos.nombre);
-
-    if (!guardado) {
-      throw new Error('No se pudo confirmar el guardado. Revisa Google Sheets.');
-    }
-
+    await enviarDatos({action: id ? 'editarPremio' : 'guardarPremio', id, ...datos});
+    await esperarPremioGuardado(id, datos.nombre, idsAntes);
     limpiarFormularioPremio();
     alert('Premio guardado correctamente.');
-
   } catch (error) {
     console.error(error);
-    alert(error.message || 'No se pudo guardar el premio.');
+    alert(error.message || 'No se pudo confirmar el guardado.');
   } finally {
     boton.disabled = false;
     boton.textContent = id ? 'Actualizar premio' : 'Guardar premio';
@@ -1490,7 +1482,8 @@ function animarRuleta() {
 
     function paso() {
       const numero = Math.floor(Math.random() * totalBoletos) + 1;
-      pantalla.textContent = String(numero).padStart(3, '0');
+      pantalla.textContent = String(numero).padStart(Math.max(3, String(totalBoletos).length), '0');
+      pantalla.style.setProperty('--tono-ruleta', `${Math.floor(Math.random() * 360)}deg`);
       sonidoSorteo(450 + Math.random() * 350, 0.035);
 
       const transcurrido = Date.now() - inicio;
@@ -1522,20 +1515,32 @@ $('btnIniciarSorteo').addEventListener('click', async () => {
   $('tituloModalSorteo').textContent = '¡Mucha suerte!';
   $('textoSorteo').textContent = 'Estamos eligiendo al ganador…';
   $('ruletaNumero').textContent = '---';
+  $('ruletaNumero').classList.remove('ruleta-final');
 
   try {
-    await animarRuleta();
-
+    // El servidor registra el resultado ANTES de la animación.
+    // Con no-cors no podemos leer el POST: comprobamos el historial mediante GET.
+    await cargarDatos();
+    if (ganadores.some(g => String(g.premioId) === String(premioId))) {
+      throw new Error('Este premio ya tiene ganador. Consulta el historial; no se realizará otro sorteo.');
+    }
     await enviarDatos({
       action: 'realizarSorteo',
       premioId,
       incluirPendientes: $('incluirPendientes').checked
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1100));
-    await cargarDatos();
-
-    const ganador = ganadores.find(g => String(g.premioId) === String(premioId));
+    let ganador = null;
+    for (let intento = 0; intento < 8; intento++) {
+      await new Promise(resolve => setTimeout(resolve, 650));
+      await cargarDatos();
+      ganador = ganadores.find(g => String(g.premioId) === String(premioId));
+      if (ganador) break;
+    }
+    if (!ganador) {
+      throw new Error('No se confirmó el resultado. Revisa el historial antes de intentar de nuevo.');
+    }
+    await animarRuleta();
 
     if (!ganador) {
       throw new Error('No se pudo recuperar el resultado. Actualiza el historial antes de repetir el sorteo.');
@@ -1544,12 +1549,14 @@ $('btnIniciarSorteo').addEventListener('click', async () => {
     ganadorActual = ganador;
 
     $('ruletaNumero').textContent = ganador.numero;
+    $('ruletaNumero').classList.add('ruleta-final');
     $('tituloModalSorteo').textContent = '¡Tenemos ganador!';
     $('textoSorteo').textContent = '¡Felicitaciones!';
 
     $('ganadorNumero').textContent = `N.º ${ganador.numero}`;
     $('ganadorNombre').textContent = ganador.nombre;
     $('ganadorPremio').textContent = ganador.premio;
+    $('mensajeGanador').value = `¡Graciaaaaas por participar en la Gran Rifa! 🎉\n\n¡${ganador.nombre}, muchas felicidades! Tu número ${ganador.numero} tuvo la suerte de ganar nuestro maravilloso premio: ${ganador.premio}. 🎁\n\n¡Esperamos que disfrutes muchísimo tu premio!`;
     $('resultadoGanador').classList.remove('hidden');
 
     sonidoSorteo(880, 0.35);
@@ -1578,11 +1585,8 @@ $('btnWhatsAppGanador').addEventListener('click', () => {
     return;
   }
 
-  const mensaje =
-    `¡Felicitaciones, ${ganadorActual.nombre}! 🎉\n` +
-    `Has ganado: ${ganadorActual.premio}.\n` +
-    `Tu número ganador fue: ${ganadorActual.numero}.\n` +
-    `¡Muchas gracias por participar!`;
+  const mensaje = $('mensajeGanador').value.trim();
+  if (!mensaje) { alert('Escribe el mensaje antes de abrir WhatsApp.'); return; }
 
   window.open(
     `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`,

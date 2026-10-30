@@ -831,3 +831,11 @@ body.modal-open { overflow: hidden; }
     padding: 18px 12px;
   }
 }
+
+/* Mejoras para proyección y notificación editable */
+.ruleta-numero {filter:hue-rotate(var(--tono-ruleta, 0deg)); transition:filter .09s,transform .16s; font-variant-numeric:tabular-nums;}
+.ruleta-final {filter:none!important; animation:rifaVictoria .7s ease-out 2; text-shadow:0 0 18px #f8d66b,0 0 42px #ffb600;}
+@keyframes rifaVictoria {50% {transform:scale(1.15)}}
+.mensaje-label {display:block;margin:18px 0 6px;font-weight:700;text-align:left;}
+.mensaje-ganador {width:100%;min-height:125px;padding:12px;border-radius:12px;border:1px solid #c4c4c4;background:#fff;color:#222;font:inherit;resize:vertical;}
+@media(min-width:900px){.sorteo-modal-card{max-width:900px}.ruleta-numero{font-size:clamp(100px,17vw,240px)}}
