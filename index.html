@@ -1360,7 +1360,7 @@ function renderPremios() {
     lista.innerHTML = premios.map(p => `
       <article class="premio-card">
         ${p.imagenUrl
-          ? `<img src="${escapar(p.imagenUrl)}" alt="${escapar(p.nombre)}">`
+          ? `<img class="premio-foto-ampliable" src="${escapar(p.imagenUrl)}" alt="${escapar(p.nombre)}" tabindex="0" role="button" title="Ver fotografía completa" data-premio-id="${escapar(p.id)}">`
           : '<div class="premio-sin-imagen">Sin imagen</div>'}
         <div class="premio-card-body">
           <span class="premio-estado ${p.estado === 'Sorteado' ? 'sorteado' : ''}">
@@ -1639,6 +1639,62 @@ window.notificarGanador = async function(id) {
 };
 cargarMemoriaLocal();
 cargarDatos();
+</script>
+
+<!-- Visor de premios: solo presentación; no modifica datos -->
+<div id="visorPremio" class="visor-premio" role="dialog" aria-modal="true" aria-label="Fotografía del premio" hidden>
+  <div class="visor-barra">
+    <button id="visorPantalla" type="button">⛶ Pantalla completa</button>
+    <button id="visorCerrar" type="button" aria-label="Cerrar fotografía">✕ Cerrar</button>
+  </div>
+  <div class="visor-contenido">
+    <img id="visorImagen" alt="Fotografía del premio">
+    <h2 id="visorTitulo"></h2>
+    <p id="visorDonante"></p>
+  </div>
+</div>
+<script>
+(function(){
+  const visor = document.getElementById('visorPremio');
+  const imagen = document.getElementById('visorImagen');
+  const titulo = document.getElementById('visorTitulo');
+  const donante = document.getElementById('visorDonante');
+  const cerrar = document.getElementById('visorCerrar');
+  let anterior = null;
+  function abrir(elemento){
+    const premio = (typeof premios !== 'undefined' ? premios : []).find(p => String(p.id) === elemento.dataset.premioId);
+    if (!premio || !premio.imagenUrl) return;
+    anterior = document.activeElement;
+    imagen.src = premio.imagenUrl;
+    imagen.alt = premio.nombre;
+    titulo.textContent = premio.nombre;
+    donante.textContent = 'Donado por: ' + (premio.donante || 'No especificado');
+    visor.hidden = false;
+    document.body.classList.add('visor-abierto');
+    cerrar.focus();
+  }
+  function salir(){
+    if(document.fullscreenElement && visor.contains(document.fullscreenElement)) document.exitFullscreen().catch(()=>{});
+    visor.hidden = true;
+    imagen.removeAttribute('src');
+    document.body.classList.remove('visor-abierto');
+    if(anterior && anterior.focus) anterior.focus();
+  }
+  document.addEventListener('click', e => {
+    const foto = e.target.closest('.premio-foto-ampliable');
+    if(foto) abrir(foto);
+  });
+  document.addEventListener('keydown', e => {
+    if(!visor.hidden && e.key === 'Escape') salir();
+    if((e.key === 'Enter' || e.key === ' ') && e.target.matches('.premio-foto-ampliable')){e.preventDefault();abrir(e.target);}
+  });
+  cerrar.addEventListener('click', salir);
+  visor.addEventListener('click', e => {if(e.target === visor) salir();});
+  document.getElementById('visorPantalla').addEventListener('click', () => {
+    if(!document.fullscreenElement) visor.requestFullscreen?.().catch(()=>{});
+    else document.exitFullscreen?.().catch(()=>{});
+  });
+})();
 </script>
 </body>
 </html>
