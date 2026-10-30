@@ -1288,6 +1288,7 @@ async function obtenerImagenSubida(archivo) {
   return respuesta;
 }
 
+
 formPremio.addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -1319,19 +1320,10 @@ formPremio.addEventListener('submit', async e => {
     if (archivo) {
       const imagen = await comprimirImagenPremio(archivo);
 
-      await enviarDatos({
-        action: 'subirImagenPremio',
-        base64: imagen.base64,
-        mimeType: imagen.mimeType,
-        nombreArchivo: archivo.name.replace(/\.[^.]+$/, '') + '.jpg'
-      });
-
-      await new Promise(resolve => setTimeout(resolve, 1300));
-
-      // La respuesta POST es opaca por no-cors.
-      // Para recuperar la URL del archivo, se necesita una pequeña
-      // ampliación en Apps Script que se explica más abajo.
-      throw new Error('La subida necesita devolver la URL de Drive. Aplica primero el ajuste de Apps Script indicado al final.');
+      datos.base64 = imagen.base64;
+      datos.mimeType = imagen.mimeType;
+      datos.nombreArchivo =
+        archivo.name.replace(/\.[^.]+$/, '') + '.jpg';
     }
 
     await enviarDatos({
@@ -1340,11 +1332,20 @@ formPremio.addEventListener('submit', async e => {
       ...datos
     });
 
-    await new Promise(resolve => setTimeout(resolve, 900));
+    await new Promise(resolve => setTimeout(resolve, 1800));
     await cargarDatos();
-    limpiarFormularioPremio();
 
-    alert('Premio guardado.');
+    const guardado = id
+      ? premios.some(p => String(p.id) === String(id))
+      : premios.some(p => p.nombre === datos.nombre);
+
+    if (!guardado) {
+      throw new Error('No se pudo confirmar el guardado. Revisa Google Sheets.');
+    }
+
+    limpiarFormularioPremio();
+    alert('Premio guardado correctamente.');
+
   } catch (error) {
     console.error(error);
     alert(error.message || 'No se pudo guardar el premio.');
